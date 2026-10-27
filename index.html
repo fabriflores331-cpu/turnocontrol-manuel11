@@ -6,144 +6,411 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f97316">
 <title>TurnoControl · Manuel 11</title>
+
 <style>
-:root{--orange:#f97316;--blue:#173b72;--bg:#f3f6fb;--text:#172033;--muted:#718096;--border:#e4e9f2}
+:root{
+  --orange:#f97316;
+  --blue:#173b72;
+  --bg:#f3f6fb;
+  --text:#172033;
+  --muted:#718096;
+  --border:#e4e9f2;
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text)}
-header{background:var(--blue);color:white;padding:24px 20px 30px;border-radius:0 0 28px 28px}
-.brand{font-size:12px;opacity:.8;letter-spacing:1.5px}
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  background:var(--blue);
+  color:white;
+  padding:24px 20px 30px;
+  border-radius:0 0 28px 28px;
+}
+.brand{
+  font-size:12px;
+  opacity:.8;
+  letter-spacing:1.5px;
+}
 h1{margin:8px 0;font-size:27px}
 header p{margin:0;opacity:.85;font-size:14px}
-main{max-width:700px;margin:-12px auto 0;padding:0 16px 32px}
-.card{background:white;padding:20px;margin-bottom:16px;border-radius:20px;box-shadow:0 6px 24px #173b7210}
+main{
+  max-width:700px;
+  margin:-12px auto 0;
+  padding:0 16px 32px;
+}
+.card{
+  background:white;
+  padding:20px;
+  margin-bottom:16px;
+  border-radius:20px;
+  box-shadow:0 6px 24px #173b7210;
+}
 h2{font-size:17px;margin:0 0 14px}
-label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
-input,select{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:white}
-button{width:100%;border:0;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
-button:disabled{opacity:.55}
-.primary{background:var(--orange);color:white;margin-top:14px}
-.secondary{background:#edf2fa;color:var(--blue);margin-top:10px}
-.grid,.punches{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.status{display:flex;align-items:center;gap:10px;background:#fff7ed;border-radius:12px;padding:13px;font-size:13px;color:#9a3412}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--orange)}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  margin:12px 0 6px;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:15px;
+  background:white;
+}
+input[type="file"]{
+  font-size:13px;
+  padding:10px;
+}
+button{
+  width:100%;
+  border:0;
+  padding:13px;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+button:disabled{opacity:.55;cursor:wait}
+.primary{
+  background:var(--orange);
+  color:white;
+  margin-top:14px;
+}
+.secondary{
+  background:#edf2fa;
+  color:var(--blue);
+  margin-top:10px;
+}
+.grid,.punches{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.muted{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+.status{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#fff7ed;
+  border-radius:12px;
+  padding:13px;
+  font-size:13px;
+  color:#9a3412;
+}
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--orange);
+  flex-shrink:0;
+}
 #app{display:none}
-#message,#workMessage{white-space:pre-wrap;margin-top:12px;font-size:13px}
+#message,#workMessage{
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  margin-top:12px;
+  font-size:13px;
+}
 #workerList{display:grid;gap:8px}
-.worker{padding:11px;border:1px solid var(--border);border-radius:12px;font-size:14px}
-.small{font-size:12px;color:var(--muted)}
+.worker{
+  padding:11px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:14px;
+}
+.small{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.5;
+}
+#photoPreview{
+  display:none;
+  width:100%;
+  max-height:300px;
+  object-fit:contain;
+  border-radius:12px;
+  margin-top:10px;
+  background:#f3f6fb;
+}
+@media(max-width:360px){
+  .punches{grid-template-columns:1fr}
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<div class="brand">CONTROL DE PERSONAL · 3A</div>
-<h1>TurnoControl</h1>
-<p>Manuel 11 · Horarios y asistencia</p>
+  <div class="brand">CONTROL DE PERSONAL · 3A</div>
+  <h1>TurnoControl</h1>
+  <p>Manuel 11 · Horarios y asistencia</p>
 </header>
+
 <main>
-<section class="card" id="login">
-<h2>Ingresar a tu cuenta</h2>
-<p class="muted">Accede con tu correo y contraseña de Supabase.</p>
-<label for="email">Correo electrónico</label>
-<input id="email" type="email" autocomplete="username" placeholder="tu@correo.com">
-<label for="password">Contraseña</label>
-<input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña">
-<button class="primary" id="loginBtn">Iniciar sesión</button>
-<div id="message" role="status"></div>
-</section>
 
-<section id="app">
-<section class="card">
-<h2>Panel de control</h2>
-<div class="status"><span class="dot"></span><span id="userInfo">Sesión iniciada</span></div>
-<p id="roleInfo" class="muted">Comprobando perfil…</p>
-<button class="secondary" id="logoutBtn">Cerrar sesión</button>
-<div id="workMessage" role="status"></div>
-</section>
+  <!-- INICIO DE SESIÓN -->
+  <section class="card" id="login">
+    <h2>Ingresar a tu cuenta</h2>
+    <p class="muted">Accede con tu correo y contraseña de Supabase.</p>
 
-<section class="card">
-<h2>Registrar mi asistencia</h2>
-<p class="muted">Registra la entrada, el inicio y fin del refrigerio, y la salida.</p>
-<div class="punches">
-<button class="primary punch" data-type="entry">Entrada</button>
-<button class="primary punch" data-type="break_start">Inicio refrigerio</button>
-<button class="primary punch" data-type="break_end">Fin refrigerio</button>
-<button class="primary punch" data-type="exit">Salida</button>
-</div>
-<p class="small">Si Supabase rechaza la marcación, revisaremos los permisos sin desactivar RLS.</p>
-</section>
+    <label for="email">Correo electrónico</label>
+    <input
+      id="email"
+      type="email"
+      autocomplete="username"
+      placeholder="tu@correo.com"
+    >
 
-<section class="card" id="adminCard" style="display:none">
-<h2>Personal</h2>
-<p class="muted">Trabajadores registrados en la tabla employees.</p>
-<button class="secondary" id="reloadWorkers">Actualizar lista</button>
-<div id="workerList" style="margin-top:12px"></div>
-<h2 style="margin-top:22px">Registrar trabajador</h2>
-<label for="dni">DNI</label>
-<input id="dni" inputmode="numeric" placeholder="DNI">
-<label for="fullName">Nombre completo</label>
-<input id="fullName" placeholder="Nombre y apellidos">
-<label for="employmentType">Tipo de jornada</label>
-<select id="employmentType">
-<option value="full_time">Tiempo completo</option>
-<option value="part_time">Tiempo parcial</option>
-</select>
-<button class="primary" id="addWorker">Guardar trabajador</button>
-<p class="small">El acceso del trabajador requiere crear su cuenta de autenticación por separado.</p>
-</section>
+    <label for="password">Contraseña</label>
+    <input
+      id="password"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Tu contraseña"
+    >
 
-<section class="card">
-<h2>Estado del sistema</h2>
-<p class="muted">Conexión: <strong id="connectionState">iniciando…</strong></p>
-<p class="muted">La gestión completa de horarios y los reportes se incorporarán después de comprobar la conexión.</p>
-</section>
-</section>
+    <button class="primary" id="loginBtn">Iniciar sesión</button>
+    <div id="message" role="status"></div>
+  </section>
 
-<section class="card">
-<h2>Tu jornada, más sencilla</h2>
-<p class="muted">Consulta tus horarios y registra tu asistencia desde un solo lugar.</p>
-<div class="status"><span class="dot"></span> Acceso protegido por tu cuenta</div>
-</section>
+  <!-- APLICACIÓN -->
+  <section id="app">
+
+    <section class="card">
+      <h2>Panel de control</h2>
+
+      <div class="status">
+        <span class="dot"></span>
+        <span id="userInfo">Sesión iniciada</span>
+      </div>
+
+      <p id="roleInfo" class="muted">Comprobando perfil…</p>
+
+      <button class="secondary" id="logoutBtn">
+        Cerrar sesión
+      </button>
+
+      <div id="workMessage" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ASISTENCIA CON FOTO -->
+    <section class="card">
+      <h2>Registrar mi asistencia</h2>
+
+      <p class="muted">
+        Debes seleccionar o tomar una foto antes de registrar cada
+        entrada, inicio de refrigerio, fin de refrigerio o salida.
+      </p>
+
+      <label for="attendancePhoto">Foto obligatoria</label>
+
+      <input
+        id="attendancePhoto"
+        type="file"
+        accept="image/*"
+        capture="user"
+        required
+      >
+
+      <img id="photoPreview" alt="Vista previa de la foto">
+
+      <p class="small">
+        La foto debe ser una imagen de hasta 5 MB.
+        Se almacenará en el bucket privado de Supabase.
+      </p>
+
+      <div class="punches">
+        <button class="primary punch" data-type="entry">
+          Entrada
+        </button>
+
+        <button class="primary punch" data-type="break_start">
+          Inicio refrigerio
+        </button>
+
+        <button class="primary punch" data-type="break_end">
+          Fin refrigerio
+        </button>
+
+        <button class="primary punch" data-type="exit">
+          Salida
+        </button>
+      </div>
+    </section>
+
+    <!-- ADMINISTRACIÓN -->
+    <section class="card" id="adminCard" style="display:none">
+      <h2>Personal</h2>
+
+      <p class="muted">
+        Trabajadores registrados en la tabla employees.
+      </p>
+
+      <button class="secondary" id="reloadWorkers">
+        Actualizar lista
+      </button>
+
+      <div id="workerList" style="margin-top:12px"></div>
+
+      <h2 style="margin-top:22px">Registrar trabajador</h2>
+
+      <label for="dni">DNI</label>
+      <input id="dni" inputmode="numeric" placeholder="DNI">
+
+      <label for="fullName">Nombre completo</label>
+      <input id="fullName" placeholder="Nombre y apellidos">
+
+      <label for="employmentType">Tipo de jornada</label>
+      <select id="employmentType">
+        <option value="full_time">Tiempo completo</option>
+        <option value="part_time">Tiempo parcial</option>
+      </select>
+
+      <button class="primary" id="addWorker">
+        Guardar trabajador
+      </button>
+
+      <p class="small">
+        El acceso del trabajador requiere crear su cuenta de
+        autenticación por separado.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Estado del sistema</h2>
+
+      <p class="muted">
+        Conexión: <strong id="connectionState">iniciando…</strong>
+      </p>
+
+      <p class="muted">
+        La gestión completa de horarios y los reportes se
+        incorporarán después de comprobar la conexión.
+      </p>
+    </section>
+
+  </section>
+
+  <section class="card">
+    <h2>Tu jornada, más sencilla</h2>
+
+    <p class="muted">
+      Consulta tus horarios y registra tu asistencia desde un solo lugar.
+    </p>
+
+    <div class="status">
+      <span class="dot"></span>
+      Acceso protegido por tu cuenta
+    </div>
+  </section>
+
 </main>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const SUPABASE_URL = 'https://rgadrcvqvqnktwrnimpk.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8eI';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL =
+  'https://rgadrcvqvqnktwrnimpk.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8eI';
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 const $ = id => document.getElementById(id);
 
 let currentProfile = null;
+let isSavingMark = false;
+let previewUrl = null;
 
 function showMessage(text) {
   $('message').textContent = text;
 }
+
 function workMessage(text) {
   $('workMessage').textContent = text;
 }
 
+// VISTA PREVIA DE LA FOTO
+$('attendancePhoto').addEventListener('change', () => {
+  const file = $('attendancePhoto').files?.[0];
+  const preview = $('photoPreview');
+
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+  }
+
+  if (!file) {
+    preview.removeAttribute('src');
+    preview.style.display = 'none';
+    return;
+  }
+
+  if (!file.type.startsWith('image/')) {
+    $('attendancePhoto').value = '';
+    preview.style.display = 'none';
+    workMessage('Selecciona un archivo de imagen válido.');
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    $('attendancePhoto').value = '';
+    preview.style.display = 'none';
+    workMessage('La foto supera los 5 MB. Selecciona otra.');
+    return;
+  }
+
+  previewUrl = URL.createObjectURL(file);
+  preview.src = previewUrl;
+  preview.style.display = 'block';
+
+  workMessage('Foto seleccionada. Ya puedes registrar tu asistencia.');
+});
+
+// COMPROBAR SESIÓN
 async function refreshSession() {
   const { data, error } = await supabase.auth.getSession();
+
   if (error) {
-    showMessage(error.message);
+    showMessage('Error de sesión: ' + error.message);
     return;
   }
 
   const session = data.session;
+
   $('login').style.display = session ? 'none' : 'block';
   $('app').style.display = session ? 'block' : 'none';
 
   if (!session) {
     currentProfile = null;
+    $('connectionState').textContent = 'Sin sesión';
     return;
   }
 
-  $('userInfo').textContent = session.user.email || 'Sesión iniciada';
+  $('userInfo').textContent =
+    session.user.email || 'Sesión iniciada';
+
   $('connectionState').textContent = 'Sesión activa';
+
   await loadProfile(session.user);
 }
 
+// CARGAR PERFIL
 async function loadProfile(user) {
   const { data, error } = await supabase
     .from('profiles')
@@ -153,19 +420,35 @@ async function loadProfile(user) {
 
   if (error) {
     currentProfile = null;
-    $('roleInfo').textContent = 'Error al consultar perfil: ' + error.message;
+
+    $('roleInfo').textContent =
+      'Error al consultar perfil: ' + error.message;
+
+    $('adminCard').style.display = 'none';
+    return;
+  }
+
+  if (!data) {
+    currentProfile = null;
+
+    $('roleInfo').textContent =
+      'No se encontró un perfil vinculado a esta cuenta.';
+
+    $('adminCard').style.display = 'none';
+    return;
+  }
+
+  if (data.active === false) {
+    currentProfile = null;
+
+    $('roleInfo').textContent =
+      'Tu perfil está inactivo. Contacta al administrador.';
+
     $('adminCard').style.display = 'none';
     return;
   }
 
   currentProfile = data;
-
-  if (!data) {
-    $('roleInfo').textContent =
-      'No se encontró un perfil vinculado a esta cuenta.';
-    $('adminCard').style.display = 'none';
-    return;
-  }
 
   $('roleInfo').textContent =
     'Perfil: ' + (data.full_name || user.email) +
@@ -174,9 +457,12 @@ async function loadProfile(user) {
   $('adminCard').style.display =
     data.role === 'admin' ? 'block' : 'none';
 
-  if (data.role === 'admin') await loadWorkers();
+  if (data.role === 'admin') {
+    await loadWorkers();
+  }
 }
 
+// INICIAR SESIÓN
 $('loginBtn').addEventListener('click', async () => {
   const email = $('email').value.trim();
   const password = $('password').value;
@@ -189,49 +475,71 @@ $('loginBtn').addEventListener('click', async () => {
   $('loginBtn').disabled = true;
   showMessage('Verificando acceso…');
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-  $('loginBtn').disabled = false;
-
-  if (error) {
-    showMessage('No se pudo ingresar: ' + error.message);
-    return;
-  }
-
-  showMessage('');
-  await refreshSession();
-});
-
-$('logoutBtn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
-  await refreshSession();
-});
-
-document.querySelectorAll('.punch').forEach(button => {
-  button.addEventListener('click', async () => {
-    if (!currentProfile) {
-      workMessage('No se encontró tu perfil. No se guardó la marcación.');
+    if (error) {
+      showMessage('No se pudo ingresar: ' + error.message);
       return;
     }
 
-    document.querySelectorAll('.punch').forEach(b => b.disabled = true);
-    workMessage('Guardando marcación…');
+    showMessage('');
+    await refreshSession();
+  } catch (error) {
+    showMessage('Error de conexión: ' + error.message);
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+});
 
-    const { error } = await supabase
-      .from('attendance_marks')
-      .insert({
-        worker_id: currentProfile.id,
-        mark_type: button.dataset.type,
-        marked_at: new Date().toISOString()
-      });
+// CERRAR SESIÓN
+$('logoutBtn').addEventListener('click', async () => {
+  const { error } = await supabase.auth.signOut();
 
-    document.querySelectorAll('.punch').forEach(b => b.disabled = false);
+  if (error) {
+    workMessage('No se pudo cerrar sesión: ' + error.message);
+    return;
+  }
 
-    if (error) {
-      workMessage('No se pudo guardar: ' + error.message);
+  currentProfile = null;
+  await refreshSession();
+});
+
+// REGISTRO DE ASISTENCIA CON FOTO OBLIGATORIA
+document.querySelectorAll('.punch').forEach(button => {
+  button.addEventListener('click', async () => {
+    if (isSavingMark) return;
+
+    if (!currentProfile) {
+      workMessage(
+        'No se encontró tu perfil. No se guardó la marcación.'
+      );
+      return;
+    }
+
+    const photoInput = $('attendancePhoto');
+    const file = photoInput.files?.[0];
+
+    if (!file) {
+      workMessage(
+        'Debes tomar o seleccionar una foto antes de marcar.'
+      );
+      photoInput.focus();
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      workMessage('El archivo debe ser una imagen.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      workMessage(
+        'La foto supera los 5 MB. Selecciona una foto más ligera.'
+      );
       return;
     }
 
@@ -242,10 +550,123 @@ document.querySelectorAll('.punch').forEach(button => {
       exit: 'Salida'
     };
 
-    workMessage('Marcación guardada: ' + names[button.dataset.type] + '.');
+    const markName = names[button.dataset.type];
+
+    if (!markName) {
+      workMessage('Tipo de marcación no válido.');
+      return;
+    }
+
+    isSavingMark = true;
+
+    document.querySelectorAll('.punch').forEach(b => {
+      b.disabled = true;
+    });
+
+    photoInput.disabled = true;
+
+    let uploadedPath = null;
+
+    try {
+      workMessage('Subiendo foto de asistencia…');
+
+      const extensionMap = {
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp',
+        'image/heic': 'heic',
+        'image/heif': 'heif'
+      };
+
+      const extension = extensionMap[file.type];
+
+      if (!extension) {
+        throw new Error(
+          'Formato no compatible. Usa JPG, PNG o WEBP.'
+        );
+      }
+
+      const photoTime = new Date().toISOString();
+
+      // La carpeta corresponde al ID del perfil autenticado.
+      const path =
+        `${currentProfile.id}/${Date.now()}.${extension}`;
+
+      // PRIMERO: subir la foto al bucket privado.
+      const { data: uploadData, error: uploadError } =
+        await supabase.storage
+          .from('attendance-photos')
+          .upload(path, file, {
+            contentType: file.type,
+            upsert: false
+          });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      uploadedPath = uploadData.path;
+
+      workMessage('Foto subida. Guardando marcación…');
+
+      // SEGUNDO: guardar hora, tipo y ruta de la foto.
+      const { error: insertError } = await supabase
+        .from('attendance_marks')
+        .insert({
+          worker_id: currentProfile.id,
+          mark_type: button.dataset.type,
+          marked_at: photoTime,
+          photo_path: uploadedPath,
+          photo_taken_at: photoTime
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      workMessage(
+        'Marcación guardada: ' + markName +
+        '. La foto también se registró correctamente.'
+      );
+
+      // Limpiar la selección tras guardar con éxito.
+      photoInput.value = '';
+
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+      }
+
+      $('photoPreview').removeAttribute('src');
+      $('photoPreview').style.display = 'none';
+
+    } catch (error) {
+      console.error('Error en marcación:', error);
+
+      workMessage(
+        'No se pudo guardar: ' +
+        (error?.message || 'Error desconocido')
+      );
+
+      if (uploadedPath) {
+        console.warn(
+          'La foto pudo subirse, pero la marcación falló. Ruta:',
+          uploadedPath
+        );
+      }
+    } finally {
+      isSavingMark = false;
+
+      document.querySelectorAll('.punch').forEach(b => {
+        b.disabled = false;
+      });
+
+      photoInput.disabled = false;
+    }
   });
 });
 
+// CARGAR TRABAJADORES
 async function loadWorkers() {
   $('workerList').textContent = 'Cargando…';
 
@@ -255,31 +676,41 @@ async function loadWorkers() {
     .order('full_name');
 
   if (error) {
-    $('workerList').textContent = 'Error al cargar personal: ' + error.message;
+    $('workerList').textContent =
+      'Error al cargar personal: ' + error.message;
     return;
   }
 
   if (!data || data.length === 0) {
-    $('workerList').textContent = 'No hay trabajadores registrados.';
+    $('workerList').textContent =
+      'No hay trabajadores registrados.';
     return;
   }
 
-  $('workerList').replaceChildren(...data.map(worker => {
-    const item = document.createElement('div');
-    item.className = 'worker';
-    item.textContent =
-      (worker.full_name || 'Sin nombre') +
-      ' · DNI ' + (worker.dni || '—') +
-      ' · ' + (worker.active ? 'Activo' : 'Inactivo');
-    return item;
-  }));
+  $('workerList').replaceChildren(
+    ...data.map(worker => {
+      const item = document.createElement('div');
+
+      item.className = 'worker';
+
+      item.textContent =
+        (worker.full_name || 'Sin nombre') +
+        ' · DNI ' + (worker.dni || '—') +
+        ' · ' + (worker.active ? 'Activo' : 'Inactivo');
+
+      return item;
+    })
+  );
 }
 
 $('reloadWorkers').addEventListener('click', loadWorkers);
 
+// REGISTRAR TRABAJADOR
 $('addWorker').addEventListener('click', async () => {
   if (currentProfile?.role !== 'admin') {
-    workMessage('Solo el administrador puede registrar trabajadores.');
+    workMessage(
+      'Solo el administrador puede registrar trabajadores.'
+    );
     return;
   }
 
@@ -291,29 +722,49 @@ $('addWorker').addEventListener('click', async () => {
     return;
   }
 
-  const { error } = await supabase.from('employees').insert({
-    dni,
-    full_name: fullName,
-    role: 'worker',
-    active: true
-  });
+  $('addWorker').disabled = true;
 
-  if (error) {
-    workMessage('No se pudo guardar: ' + error.message);
-    return;
+  try {
+    const { error } = await supabase
+      .from('employees')
+      .insert({
+        dni,
+        full_name: fullName,
+        role: 'worker',
+        active: true
+      });
+
+    if (error) {
+      workMessage(
+        'No se pudo guardar el trabajador: ' + error.message
+      );
+      return;
+    }
+
+    $('dni').value = '';
+    $('fullName').value = '';
+
+    workMessage('Trabajador registrado correctamente.');
+
+    await loadWorkers();
+
+  } catch (error) {
+    workMessage(
+      'Error al registrar trabajador: ' + error.message
+    );
+  } finally {
+    $('addWorker').disabled = false;
   }
-
-  $('dni').value = '';
-  $('fullName').value = '';
-  workMessage('Trabajador registrado.');
-  await loadWorkers();
 });
 
+// ACTUALIZAR INTERFAZ SI CAMBIA LA SESIÓN
 supabase.auth.onAuthStateChange(() => {
   setTimeout(() => refreshSession(), 0);
 });
 
+// INICIO
 await refreshSession();
 </script>
+
 </body>
 </html>
