@@ -3,518 +3,622 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f97316">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TurnoControl · Manuel 11</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
-:root{--orange:#f97316;--blue:#173b72;--bg:#f3f6fb;--text:#172033;--muted:#718096;--border:#e4e9f2}
+:root{--orange:#f58220;--blue:#123b70;--bg:#f3f6fb;--white:#fff;--red:#b42318;--green:#157347}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text)}
-header{background:var(--blue);color:white;padding:24px 20px 30px;border-radius:0 0 28px 28px}
-.brand{font-size:12px;opacity:.8;letter-spacing:1.5px}
-h1{margin:8px 0;font-size:27px}
-header p{margin:0;opacity:.85;font-size:14px}
-main{max-width:700px;margin:-12px auto 0;padding:0 16px 32px}
-.card{background:white;padding:20px;margin-bottom:16px;border-radius:20px;box-shadow:0 6px 24px #173b7210}
-h2{font-size:17px;margin:0 0 14px}
-label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
-input,select{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:white}
-input[type=file]{font-size:13px}
-button{width:100%;border:0;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
-button:disabled{opacity:.55;cursor:wait}
-.primary{background:var(--orange);color:white;margin-top:14px}
-.secondary{background:#edf2fa;color:var(--blue);margin-top:10px}
-.punches{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.status{display:flex;align-items:center;gap:10px;background:#fff7ed;border-radius:12px;padding:13px;font-size:13px;color:#9a3412}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex-shrink:0}
-#app{display:none}
-#message,#workMessage{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px;font-size:13px}
-#workerList,#marksList{display:grid;gap:8px}
-.worker{padding:11px;border:1px solid var(--border);border-radius:12px;font-size:14px;overflow-wrap:anywhere}
-.small{font-size:12px;color:var(--muted);line-height:1.5}
-#photoPreview{display:none;width:100%;max-height:300px;object-fit:contain;border-radius:12px;margin-top:10px;background:#f3f6fb}
-@media(max-width:360px){.punches{grid-template-columns:1fr}}
+body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:#172033}
+header{background:var(--blue);color:white;padding:20px 16px}
+header h1{margin:0;font-size:23px}
+header p{margin:6px 0 0;font-size:13px}
+main{max-width:900px;margin:auto;padding:14px}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0000000c}
+h2{font-size:18px;margin:0 0 13px;color:var(--blue)}
+h3{font-size:15px;color:var(--blue)}
+label{display:block;font-size:13px;font-weight:bold;margin:10px 0 5px}
+input,select,button{font:inherit}
+input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;background:white;min-height:42px}
+button{border:0;border-radius:9px;padding:12px 14px;background:var(--orange);color:white;font-weight:bold;cursor:pointer;min-height:42px}
+button.secondary{background:var(--blue)}
+button.danger{background:var(--red)}
+button:disabled{opacity:.5}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.actions button{width:100%}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hidden{display:none!important}
+.note{font-size:13px;color:#526078;line-height:1.5}
+.status{padding:10px;border-radius:8px;margin:10px 0;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.ok{background:#e9f7ef;color:#14532d}
+.err{background:#fff0f0;color:#9f1c1c}
+.item{border-top:1px solid #e5eaf1;padding:11px 0;font-size:14px;overflow-wrap:anywhere}
+.item:first-child{border-top:0}
+.pill{display:inline-block;background:#e8eef8;color:var(--blue);padding:4px 8px;border-radius:20px;font-size:12px}
+footer{text-align:center;color:#667085;font-size:12px;padding:15px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}.card{padding:13px}}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="brand">CONTROL DE PERSONAL · 3A</div>
-  <h1>TurnoControl</h1>
-  <p>Manuel 11 · Horarios y asistencia</p>
+  <h1>🕒 TurnoControl</h1>
+  <p>MANUEL 11 · Control de asistencia 3A</p>
 </header>
 
 <main>
-  <section class="card" id="login">
-    <h2>Ingresar a tu cuenta</h2>
-    <p class="muted">Accede con tu correo y contraseña de Supabase.</p>
-    <label for="email">Correo electrónico</label>
-    <input id="email" type="email" autocomplete="username" placeholder="tu@correo.com">
-    <label for="password">Contraseña</label>
-    <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña">
-    <button class="primary" id="loginBtn">Iniciar sesión</button>
-    <div id="message" role="status"></div>
-  </section>
+<section id="loginCard" class="card">
+  <h2>Ingresar</h2>
+  <form id="loginForm">
+    <label>Correo electrónico</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label>Contraseña</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button style="width:100%;margin-top:14px" type="submit">Iniciar sesión</button>
+  </form>
+  <div id="loginMessage" class="status hidden"></div>
+</section>
 
-  <section id="app">
-    <section class="card">
-      <h2>Panel de control</h2>
-      <div class="status"><span class="dot"></span><span id="userInfo">Sesión iniciada</span></div>
-      <p id="roleInfo" class="muted">Comprobando perfil…</p>
-      <button class="secondary" id="logoutBtn">Cerrar sesión</button>
-      <div id="workMessage" role="status" aria-live="polite"></div>
-    </section>
+<section id="app" class="hidden">
+  <div class="card">
+    <div class="grid">
+      <div><span class="note">Sesión</span><div id="userName"></div></div>
+      <div><span class="note">Perfil</span><div id="userRole"></div></div>
+    </div>
+    <button id="logoutBtn" class="secondary" style="width:100%;margin-top:12px">Cerrar sesión</button>
+    <div id="message" class="status hidden"></div>
+  </div>
 
-    <section class="card">
-      <h2>Registrar mi asistencia</h2>
-      <p class="muted">Pulsa el tipo de marcación y después toma una foto con la cámara de tu celular. La foto es obligatoria.</p>
-
-      <div class="punches">
-        <button class="primary punch" data-type="entry">Entrada</button>
-        <button class="primary punch" data-type="break_start">Inicio refrigerio</button>
-        <button class="primary punch" data-type="break_end">Fin refrigerio</button>
-        <button class="primary punch" data-type="exit">Salida</button>
-      </div>
-
-      <label for="attendancePhoto">Cámara / foto de asistencia</label>
-      <input id="attendancePhoto" type="file" accept="image/*" capture="user" hidden>
-      <p class="small">La foto se guarda en el almacenamiento privado de Supabase. Límite: 5 MB.</p>
-      <img id="photoPreview" alt="Vista previa de la foto">
-    </section>
-
-    <section class="card">
-      <h2>Mis marcaciones</h2>
-      <p class="muted">Consulta tus últimos registros guardados.</p>
-      <button class="secondary" id="reloadMarks">Actualizar marcaciones</button>
-      <div id="marksList" style="margin-top:12px"></div>
-    </section>
-
-    <section class="card" id="adminCard" style="display:none">
-      <h2>Personal</h2>
-      <p class="muted">Trabajadores registrados en la tabla employees.</p>
-      <button class="secondary" id="reloadWorkers">Actualizar lista</button>
-      <div id="workerList" style="margin-top:12px"></div>
-
-      <h2 style="margin-top:22px">Registrar trabajador</h2>
-      <label for="dni">DNI</label>
-      <input id="dni" inputmode="numeric" placeholder="DNI">
-      <label for="fullName">Nombre completo</label>
-      <input id="fullName" placeholder="Nombre y apellidos">
-      <label for="employmentType">Tipo de jornada</label>
-      <select id="employmentType">
-        <option value="full_time">Tiempo completo</option>
-        <option value="part_time">Tiempo parcial</option>
-      </select>
-      <button class="primary" id="addWorker">Guardar trabajador</button>
-      <p class="small">El acceso del trabajador requiere crear su cuenta de autenticación por separado.</p>
-    </section>
-
-    <section class="card">
-      <h2>Estado del sistema</h2>
-      <p class="muted">Conexión: <strong id="connectionState">iniciando…</strong></p>
-      <p class="muted">La gestión de horarios y los reportes Excel aún no están implementados.</p>
-    </section>
+  <section id="attendanceCard" class="card">
+    <h2>📸 Registrar asistencia</h2>
+    <p class="note">La foto es obligatoria. Permite el acceso a la cámara o selecciona una imagen. La marcación se guardará con la hora registrada por el sistema.</p>
+    <label>Tipo de marcación</label>
+    <select id="markType">
+      <option value="entry">Entrada</option>
+      <option value="break_start">Inicio de refrigerio</option>
+      <option value="break_end">Fin de refrigerio</option>
+      <option value="exit">Salida</option>
+    </select>
+    <label>Foto de evidencia</label>
+    <input id="attendancePhoto" type="file" accept="image/*" capture="user" required>
+    <div id="photoPreview" class="note"></div>
+    <button id="markBtn" style="width:100%;margin-top:12px">Guardar marcación con foto</button>
+    <p class="note">No cierres esta pantalla mientras se carga la foto.</p>
   </section>
 
   <section class="card">
-    <h2>Tu jornada, más sencilla</h2>
-    <p class="muted">Consulta tus horarios y registra tu asistencia desde un solo lugar.</p>
-    <div class="status"><span class="dot"></span>Acceso protegido por tu cuenta</div>
+    <h2>📋 Mis últimas marcaciones</h2>
+    <button id="refreshHistory" class="secondary" style="width:100%">Actualizar historial</button>
+    <div id="history" style="margin-top:10px"></div>
   </section>
+
+  <section id="adminCard" class="hidden">
+    <div class="card">
+      <h2>👥 Personal</h2>
+      <button id="refreshWorkers" class="secondary" style="width:100%">Actualizar trabajadores</button>
+      <div id="workersList" style="margin-top:10px"></div>
+      <p class="note">Este panel muestra perfiles existentes. Crear una cuenta de acceso requiere registrar al usuario en Supabase Auth y su perfil correspondiente.</p>
+    </div>
+
+    <div class="card">
+      <h2>🗓️ Asignar o cambiar turno</h2>
+      <p class="note">El horario se guarda por día de la semana y se mantiene hasta la fecha de inicio de un cambio posterior. Los registros históricos se exportan según el horario que corresponda a cada fecha.</p>
+      <label>Trabajador</label>
+      <select id="scheduleWorker"></select>
+      <div class="grid">
+        <div>
+          <label>Día de la semana</label>
+          <select id="scheduleDay">
+            <option value="1">Lunes</option><option value="2">Martes</option>
+            <option value="3">Miércoles</option><option value="4">Jueves</option>
+            <option value="5">Viernes</option><option value="6">Sábado</option>
+            <option value="0">Domingo</option>
+          </select>
+        </div>
+        <div>
+          <label>Tipo de turno</label>
+          <select id="scheduleType">
+            <option value="continuous">Corrido</option>
+            <option value="split">Partido</option>
+            <option value="rest">Descanso</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid">
+        <div><label>Inicio tramo 1</label><input id="start1" type="time" value="08:00"></div>
+        <div><label>Fin tramo 1</label><input id="end1" type="time" value="17:00"></div>
+      </div>
+      <div id="secondSegment" class="grid hidden">
+        <div><label>Inicio tramo 2</label><input id="start2" type="time" value="18:00"></div>
+        <div><label>Fin tramo 2</label><input id="end2" type="time" value="22:00"></div>
+      </div>
+      <label>Minutos efectivos programados para este día</label>
+      <input id="effectiveMinutes" type="number" min="0" max="1440" value="480">
+      <p class="note">Ejemplos: jornada completa con 8 horas efectivas = 480 minutos; jornada parcial de 3 h 45 min = 225 minutos. Introduce el objetivo efectivo real de ese turno.</p>
+      <label>Vigente desde</label>
+      <input id="validFrom" type="date">
+      <button id="saveSchedule" style="width:100%;margin-top:12px">Guardar horario</button>
+      <div id="scheduleStatus" class="status hidden"></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Exportar Excel</h2>
+      <label>Desde</label><input id="exportFrom" type="date">
+      <label>Hasta</label><input id="exportTo" type="date">
+      <label>Trabajador</label>
+      <select id="exportWorker"><option value="all">Todo el equipo</option></select>
+      <button id="exportBtn" style="width:100%;margin-top:12px">Descargar Excel (.xlsx)</button>
+      <p class="note">Incluye marcaciones, horas programadas y efectivas, diferencia de horas, evidencia fotográfica e incidencias. Las horas extras son una estimación respecto al objetivo efectivo programado, no una determinación legal de sobretiempo.</p>
+    </div>
+  </section>
+</section>
+<footer>TurnoControl · Manuel 11</footer>
 </main>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = 'https://rgadrcvqvqnktwrnimpk.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8e';
+const SUPABASE_KEY = 'sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8eI';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
+let currentUser = null;
 let currentProfile = null;
-let pendingMarkType = null;
-let isSavingMark = false;
-let previewUrl = null;
+let workers = [];
 
+const dayNames = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const markNames = {
-  entry: 'Entrada',
-  break_start: 'Inicio de refrigerio',
-  break_end: 'Fin de refrigerio',
-  exit: 'Salida'
+  entry:'Entrada', break_start:'Inicio de refrigerio',
+  break_end:'Fin de refrigerio', exit:'Salida'
 };
 
-function showMessage(text) {
-  $('message').textContent = text;
+function showMessage(id, text, error=false) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'status ' + (error ? 'err' : 'ok');
+  el.classList.remove('hidden');
 }
-
-function workMessage(text) {
-  $('workMessage').textContent = text;
+function hideMessage(id) { $(id).classList.add('hidden'); }
+function todayLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
-function clearPreview() {
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = null;
-  $('photoPreview').removeAttribute('src');
-  $('photoPreview').style.display = 'none';
+function dateTimeText(value) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString('es-PE', {dateStyle:'short',timeStyle:'medium'});
 }
-
-// LOGIN
-async function refreshSession() {
-  const { data, error } = await supabase.auth.getSession();
-
-  if (error) {
-    showMessage('Error de sesión: ' + error.message);
-    return;
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+function minutesFromTime(t) {
+  if (!t) return null;
+  const p = t.slice(0,5).split(':').map(Number);
+  return p[0]*60+p[1];
+}
+function durationMinutes(start,end) {
+  let a=minutesFromTime(start), b=minutesFromTime(end);
+  if (a===null || b===null) return 0;
+  if (b<a) b+=1440;
+  return b-a;
+}
+function fmtMinutes(n) {
+  if (n===null || n===undefined || !Number.isFinite(n)) return '';
+  const sign=n<0?'-':'';
+  n=Math.abs(Math.round(n));
+  return `${sign}${Math.floor(n/60)} h ${n%60} min`;
+}
+function localIsoDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+function dateRange(from,to) {
+  const arr=[];
+  let d=new Date(from+'T12:00:00'), end=new Date(to+'T12:00:00');
+  while(d<=end && arr.length<370) {
+    arr.push(localIsoDate(d));
+    d.setDate(d.getDate()+1);
   }
-
-  const session = data.session;
-  $('login').style.display = session ? 'none' : 'block';
-  $('app').style.display = session ? 'block' : 'none';
-
-  if (!session) {
-    currentProfile = null;
-    $('connectionState').textContent = 'Sin sesión';
-    $('marksList').textContent = '';
-    $('workerList').textContent = '';
-    return;
-  }
-
-  $('userInfo').textContent = session.user.email || 'Sesión iniciada';
-  $('connectionState').textContent = 'Sesión activa';
-  await loadProfile(session.user);
+  return arr;
 }
 
 async function loadProfile(user) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id,full_name,role,active,email')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  if (error) {
-    currentProfile = null;
-    $('roleInfo').textContent = 'Error al consultar perfil: ' + error.message;
-    $('adminCard').style.display = 'none';
-    return;
-  }
-
-  if (!data) {
-    currentProfile = null;
-    $('roleInfo').textContent = 'No se encontró un perfil vinculado a esta cuenta.';
-    $('adminCard').style.display = 'none';
-    return;
-  }
-
-  if (data.active === false) {
-    currentProfile = null;
-    $('roleInfo').textContent = 'Tu perfil está inactivo. Contacta al administrador.';
-    $('adminCard').style.display = 'none';
-    return;
-  }
-
-  currentProfile = data;
-  $('roleInfo').textContent =
-    'Perfil: ' + (data.full_name || user.email) + ' · Rol: ' + data.role;
-  $('adminCard').style.display = data.role === 'admin' ? 'block' : 'none';
-
-  await loadAttendanceHistory();
-  if (data.role === 'admin') await loadWorkers();
+  const {data,error}=await supabase.from('profiles')
+    .select('id,full_name,role,active,email,employment_type')
+    .eq('id',user.id).maybeSingle();
+  if(error) throw error;
+  if(!data) throw new Error('Tu cuenta ingresó, pero no existe un perfil en profiles con id igual al usuario de Auth.');
+  if(data.active===false) throw new Error('Tu perfil está inactivo. Solicita al administrador que lo revise.');
+  return data;
 }
 
-$('loginBtn').addEventListener('click', async () => {
-  const email = $('email').value.trim();
-  const password = $('password').value;
+async function enterApp(user) {
+  currentUser=user;
+  currentProfile=await loadProfile(user);
+  $('loginCard').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('userName').textContent=currentProfile.full_name || currentProfile.email || user.email;
+  $('userRole').textContent=currentProfile.role || 'worker';
+  const admin=currentProfile.role==='admin';
+  $('adminCard').classList.toggle('hidden',!admin);
+  $('attendanceCard').classList.remove('hidden');
+  await loadHistory();
+  if(admin) await loadWorkers();
+}
 
-  if (!email || !password) {
-    showMessage('Escribe tu correo y contraseña.');
-    return;
-  }
+async function restoreSession() {
+  const {data,error}=await supabase.auth.getSession();
+  if(error) throw error;
+  if(data.session) await enterApp(data.session.user);
+}
 
-  $('loginBtn').disabled = true;
-  showMessage('Verificando acceso…');
-
+$('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  hideMessage('loginMessage');
   try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      showMessage('No se pudo ingresar: ' + error.message);
-      return;
-    }
-    showMessage('');
-    await refreshSession();
-  } catch (error) {
-    showMessage('Error de conexión: ' + error.message);
-  } finally {
-    $('loginBtn').disabled = false;
-  }
-});
-
-$('logoutBtn').addEventListener('click', async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    workMessage('No se pudo cerrar sesión: ' + error.message);
-    return;
-  }
-  currentProfile = null;
-  clearPreview();
-  await refreshSession();
-});
-
-// PULSAR BOTÓN: ABRIR CÁMARA O SELECTOR
-document.querySelectorAll('.punch').forEach(button => {
-  button.addEventListener('click', () => {
-    if (!currentProfile) {
-      workMessage('Inicia sesión y comprueba tu perfil primero.');
-      return;
-    }
-    if (isSavingMark) return;
-
-    pendingMarkType = button.dataset.type;
-    $('attendancePhoto').value = '';
-    $('attendancePhoto').click();
-  });
-});
-
-// AL TOMAR O SELECCIONAR LA FOTO, GUARDAR LA MARCACIÓN PENDIENTE
-$('attendancePhoto').addEventListener('change', async () => {
-  const file = $('attendancePhoto').files?.[0];
-
-  if (!file) {
-    pendingMarkType = null;
-    return;
-  }
-
-  if (!pendingMarkType) {
-    workMessage('Primero pulsa el botón de la marcación que deseas realizar.');
-    return;
-  }
-
-  if (!file.type.startsWith('image/')) {
-    workMessage('El archivo debe ser una imagen.');
-    $('attendancePhoto').value = '';
-    pendingMarkType = null;
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    workMessage('La foto supera los 5 MB. Toma otra foto más ligera.');
-    $('attendancePhoto').value = '';
-    pendingMarkType = null;
-    return;
-  }
-
-  clearPreview();
-  previewUrl = URL.createObjectURL(file);
-  $('photoPreview').src = previewUrl;
-  $('photoPreview').style.display = 'block';
-
-  await saveAttendance(file, pendingMarkType);
-});
-
-async function saveAttendance(file, markType) {
-  if (!currentProfile || !file || isSavingMark) return;
-
-  const markName = markNames[markType];
-  if (!markName) {
-    workMessage('Tipo de marcación no válido.');
-    pendingMarkType = null;
-    return;
-  }
-
-  isSavingMark = true;
-  document.querySelectorAll('.punch').forEach(b => b.disabled = true);
-  $('attendancePhoto').disabled = true;
-
-  let uploadedPath = null;
-
-  try {
-    const extensions = {
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-      'image/webp': 'webp'
-    };
-    const extension = extensions[file.type];
-
-    if (!extension) {
-      throw new Error('Usa una foto JPG, PNG o WEBP.');
-    }
-
-    workMessage('Subiendo foto de asistencia…');
-
-    const markedAt = new Date().toISOString();
-    const path = `${currentProfile.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
-
-    const { data: upload, error: uploadError } = await supabase.storage
-      .from('attendance-photos')
-      .upload(path, file, {
-        contentType: file.type,
-        upsert: false
-      });
-
-    if (uploadError) throw uploadError;
-    uploadedPath = upload.path;
-
-    workMessage('Foto subida. Guardando hora de marcación…');
-
-    const { error: insertError } = await supabase
-      .from('attendance_marks')
-      .insert({
-        worker_id: currentProfile.id,
-        mark_type: markType,
-        marked_at: markedAt,
-        photo_path: uploadedPath,
-        photo_taken_at: markedAt
-      });
-
-    if (insertError) throw insertError;
-
-    workMessage('¡' + markName + ' guardada correctamente con su foto!');
-    $('attendancePhoto').value = '';
-    pendingMarkType = null;
-    clearPreview();
-
-    await loadAttendanceHistory();
-
-  } catch (error) {
-    console.error('Error al guardar marcación:', error);
-    workMessage('No se pudo guardar: ' + (error?.message || 'Error desconocido'));
-
-    if (uploadedPath) {
-      console.warn('La foto pudo subirse, pero la marcación falló. Ruta:', uploadedPath);
-    }
-  } finally {
-    isSavingMark = false;
-    $('attendancePhoto').disabled = false;
-    document.querySelectorAll('.punch').forEach(b => b.disabled = false);
-  }
-}
-
-// HISTORIAL DE MARCACIONES
-async function loadAttendanceHistory() {
-  if (!currentProfile) {
-    $('marksList').textContent = 'Inicia sesión para consultar tus marcaciones.';
-    return;
-  }
-
-  $('marksList').textContent = 'Cargando marcaciones…';
-
-  const { data, error } = await supabase
-    .from('attendance_marks')
-    .select('id,mark_type,marked_at')
-    .eq('worker_id', currentProfile.id)
-    .order('marked_at', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    $('marksList').textContent = 'No se pudo cargar el historial: ' + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    $('marksList').textContent = 'Todavía no tienes marcaciones registradas.';
-    return;
-  }
-
-  const formatter = new Intl.DateTimeFormat('es-PE', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  });
-
-  $('marksList').replaceChildren(
-    ...data.map(mark => {
-      const item = document.createElement('div');
-      item.className = 'worker';
-      const date = new Date(mark.marked_at);
-      item.textContent =
-        (markNames[mark.mark_type] || mark.mark_type) +
-        ' · ' + formatter.format(date);
-      return item;
-    })
-  );
-}
-
-$('reloadMarks').addEventListener('click', loadAttendanceHistory);
-
-// PERSONAL
-async function loadWorkers() {
-  $('workerList').textContent = 'Cargando…';
-
-  const { data, error } = await supabase
-    .from('employees')
-    .select('id,dni,full_name,active')
-    .order('full_name');
-
-  if (error) {
-    $('workerList').textContent = 'Error al cargar personal: ' + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    $('workerList').textContent = 'No hay trabajadores registrados.';
-    return;
-  }
-
-  $('workerList').replaceChildren(
-    ...data.map(worker => {
-      const item = document.createElement('div');
-      item.className = 'worker';
-      item.textContent =
-        (worker.full_name || 'Sin nombre') +
-        ' · DNI ' + (worker.dni || '—') +
-        ' · ' + (worker.active ? 'Activo' : 'Inactivo');
-      return item;
-    })
-  );
-}
-
-$('reloadWorkers').addEventListener('click', loadWorkers);
-
-$('addWorker').addEventListener('click', async () => {
-  if (currentProfile?.role !== 'admin') {
-    workMessage('Solo el administrador puede registrar trabajadores.');
-    return;
-  }
-
-  const dni = $('dni').value.trim();
-  const fullName = $('fullName').value.trim();
-
-  if (!dni || !fullName) {
-    workMessage('Escribe el DNI y el nombre completo.');
-    return;
-  }
-
-  $('addWorker').disabled = true;
-
-  try {
-    const { error } = await supabase.from('employees').insert({
-      dni,
-      full_name: fullName,
-      role: 'worker',
-      active: true
+    const {data,error}=await supabase.auth.signInWithPassword({
+      email:$('email').value.trim(),
+      password:$('password').value
     });
-
-    if (error) {
-      workMessage('No se pudo guardar el trabajador: ' + error.message);
-      return;
-    }
-
-    $('dni').value = '';
-    $('fullName').value = '';
-    workMessage('Trabajador registrado correctamente.');
-    await loadWorkers();
-
-  } catch (error) {
-    workMessage('Error al registrar trabajador: ' + error.message);
-  } finally {
-    $('addWorker').disabled = false;
+    if(error) throw error;
+    await enterApp(data.user);
+  } catch(err) {
+    showMessage('loginMessage','No se pudo ingresar: '+(err.message || err),true);
   }
 });
 
-supabase.auth.onAuthStateChange(() => {
-  setTimeout(() => refreshSession(), 0);
+$('logoutBtn').addEventListener('click', async()=>{
+  await supabase.auth.signOut();
+  currentUser=null; currentProfile=null;
+  $('app').classList.add('hidden');
+  $('loginCard').classList.remove('hidden');
 });
 
-await refreshSession();
+supabase.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_OUT') {
+    $('app').classList.add('hidden');
+    $('loginCard').classList.remove('hidden');
+  }
+});
+
+$('attendancePhoto').addEventListener('change',()=>{
+  const f=$('attendancePhoto').files[0];
+  $('photoPreview').textContent=f
+    ? `Foto seleccionada: ${f.name} (${Math.round(f.size/1024)} KB)`
+    : '';
+});
+
+$('markBtn').addEventListener('click', async()=>{
+  if(!currentProfile) return;
+  const file=$('attendancePhoto').files[0];
+  if(!file) {
+    showMessage('message','Debes tomar o seleccionar una foto para registrar la marcación.',true);
+    return;
+  }
+  if(!file.type.startsWith('image/')) {
+    showMessage('message','El archivo debe ser una imagen.',true);
+    return;
+  }
+  $('markBtn').disabled=true;
+  try {
+    // Hora del dispositivo justo antes de iniciar el registro.
+    const deviceCapturedAt=new Date().toISOString();
+    const ext=(file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
+    const path=`${currentProfile.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    const {error:uploadError}=await supabase.storage
+      .from('attendance-photos')
+      .upload(path,file,{contentType:file.type,upsert:false});
+    if(uploadError) throw new Error('No se pudo subir la foto: '+uploadError.message);
+
+    const markType=$('markType').value;
+    const markedAt=new Date().toISOString();
+    const {error:insertError}=await supabase.from('attendance_marks').insert({
+      worker_id:currentProfile.id,
+      mark_type:markType,
+      marked_at:markedAt,
+      photo_path:path,
+      photo_taken_at:deviceCapturedAt
+    });
+    if(insertError) throw new Error('La foto se subió, pero la marcación no se guardó: '+insertError.message);
+    $('attendancePhoto').value='';
+    $('photoPreview').textContent='';
+    showMessage('message',`${markNames[markType]} registrada.\nHora guardada: ${dateTimeText(markedAt)}`);
+    await loadHistory();
+  } catch(err) {
+    showMessage('message',err.message || String(err),true);
+  } finally {
+    $('markBtn').disabled=false;
+  }
+});
+
+async function loadHistory() {
+  if(!currentProfile) return;
+  $('history').innerHTML='<p class="note">Cargando…</p>';
+  const {data,error}=await supabase.from('attendance_marks')
+    .select('id,mark_type,marked_at,photo_path,photo_taken_at')
+    .eq('worker_id',currentProfile.id)
+    .order('marked_at',{ascending:false}).limit(50);
+  if(error) {
+    $('history').innerHTML=`<p class="note">No se pudo cargar el historial: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  if(!data?.length) {
+    $('history').innerHTML='<p class="note">Todavía no hay marcaciones.</p>';
+    return;
+  }
+  $('history').innerHTML=data.map(m=>`
+    <div class="item">
+      <strong>${escapeHtml(markNames[m.mark_type] || m.mark_type)}</strong><br>
+      <span>${escapeHtml(dateTimeText(m.marked_at))}</span><br>
+      <span class="note">Hora registrada: ${escapeHtml(dateTimeText(m.marked_at))}</span><br>
+      <span class="note">Hora de captura reportada por el dispositivo: ${escapeHtml(dateTimeText(m.photo_taken_at))}</span><br>
+      <span class="pill">Foto guardada</span>
+    </div>`).join('');
+}
+$('refreshHistory').addEventListener('click',loadHistory);
+
+async function loadWorkers() {
+  const {data,error}=await supabase.from('profiles')
+    .select('id,full_name,role,active,employment_type')
+    .order('full_name');
+  if(error) {
+    showMessage('message','No se pudo cargar el personal: '+error.message,true);
+    return;
+  }
+  workers=(data||[]).filter(w=>w.role!=='admin' && w.active!==false);
+  const options=workers.map(w=>`<option value="${escapeHtml(w.id)}">${escapeHtml(w.full_name || w.id)}</option>`).join('');
+  $('scheduleWorker').innerHTML=options || '<option value="">No hay trabajadores</option>';
+  $('exportWorker').innerHTML='<option value="all">Todo el equipo</option>'+options;
+  $('workersList').innerHTML=(data||[]).map(w=>`
+    <div class="item">${escapeHtml(w.full_name || 'Sin nombre')}
+      <span class="pill">${escapeHtml(w.role || 'worker')}</span>
+      <div class="note">${w.active===false?'Inactivo':'Activo'} · ${escapeHtml(w.employment_type || 'Tipo no indicado')}</div>
+    </div>`).join('') || '<p class="note">No hay perfiles.</p>';
+}
+$('refreshWorkers').addEventListener('click',loadWorkers);
+
+$('scheduleType').addEventListener('change',()=>{
+  const split=$('scheduleType').value==='split';
+  $('secondSegment').classList.toggle('hidden',!split);
+  $('effectiveMinutes').disabled=$('scheduleType').value==='rest';
+  if($('scheduleType').value==='rest') $('effectiveMinutes').value=0;
+  else if(Number($('effectiveMinutes').value)===0) $('effectiveMinutes').value=480;
+});
+
+$('saveSchedule').addEventListener('click',async()=>{
+  hideMessage('scheduleStatus');
+  if(currentProfile?.role!=='admin') return;
+  const workerId=$('scheduleWorker').value;
+  const day=Number($('scheduleDay').value);
+  const type=$('scheduleType').value;
+  const from=$('validFrom').value || todayLocal();
+  if(!workerId) return showMessage('scheduleStatus','Selecciona un trabajador.',true);
+  if(!from) return showMessage('scheduleStatus','Indica la fecha desde la que rige el turno.',true);
+
+  const segments=[];
+  if(type!=='rest') {
+    const s1=$('start1').value,e1=$('end1').value;
+    if(!s1||!e1||durationMinutes(s1,e1)<=0)
+      return showMessage('scheduleStatus','Revisa las horas del primer tramo.',true);
+    segments.push({segment_order:1,start_time:s1,end_time:e1});
+    if(type==='split') {
+      const s2=$('start2').value,e2=$('end2').value;
+      if(!s2||!e2||durationMinutes(s2,e2)<=0)
+        return showMessage('scheduleStatus','Revisa las horas del segundo tramo.',true);
+      segments.push({segment_order:2,start_time:s2,end_time:e2});
+    }
+  }
+  const effective=Number($('effectiveMinutes').value||0);
+  if(effective<0||effective>1440)
+    return showMessage('scheduleStatus','Los minutos efectivos deben estar entre 0 y 1440.',true);
+
+  $('saveSchedule').disabled=true;
+  try {
+    // Cierra la versión anterior de ese día para que el cambio tenga fecha de inicio.
+    const dayBefore=new Date(from+'T12:00:00');
+    dayBefore.setDate(dayBefore.getDate()-1);
+    const until=localIsoDate(dayBefore);
+    const {error:closeError}=await supabase.from('schedule_segments')
+      .update({valid_until:until})
+      .eq('worker_id',workerId)
+      .eq('day_of_week',day)
+      .or(`valid_until.is.null,valid_until.gte.${from}`)
+      .lte('valid_from',until);
+    if(closeError) throw new Error('No se pudo cerrar el horario anterior. Revisa los permisos de actualización de schedule_segments: '+closeError.message);
+
+    if(type!=='rest') {
+      const rows=segments.map((s,i)=>({
+        worker_id:workerId,
+        day_of_week:day,
+        segment_order:s.segment_order,
+        start_time:s.start_time,
+        end_time:s.end_time,
+        effective_work_minutes:i===0?effective:0,
+        valid_from:from,
+        valid_until:null,
+        created_by:currentProfile.id
+      }));
+      const {error}=await supabase.from('schedule_segments').insert(rows);
+      if(error) throw error;
+    }
+    // Para descanso se guardan cero segmentos: el día no tendrá horario.
+    showMessage('scheduleStatus',type==='rest'
+      ? `Descanso guardado desde ${from}.`
+      : `Horario guardado desde ${from}. Se mantiene vigente hasta que se programe otro cambio.`);
+  } catch(err) {
+    showMessage('scheduleStatus','No se pudo guardar el turno: '+(err.message||err),true);
+  } finally {
+    $('saveSchedule').disabled=false;
+  }
+});
+
+async function getAllPages(table,select,filters=[]) {
+  let all=[],from=0,step=1000;
+  while(true) {
+    let q=supabase.from(table).select(select).range(from,from+step-1);
+    for(const f of filters) q=q[f.method](...f.args);
+    const {data,error}=await q;
+    if(error) throw error;
+    all=all.concat(data||[]);
+    if(!data || data.length<step) break;
+    from+=step;
+    if(from>50000) break;
+  }
+  return all;
+}
+
+async function loadSegments(from,to) {
+  const {data,error}=await supabase.from('schedule_segments')
+    .select('id,worker_id,day_of_week,segment_order,start_time,end_time,effective_work_minutes,valid_from,valid_until')
+    .lte('valid_from',to)
+    .or(`valid_until.is.null,valid_until.gte.${from}`)
+    .order('segment_order');
+  if(error) throw error;
+  return data||[];
+}
+
+function chooseSchedule(segments,workerId,date) {
+  const weekday=new Date(date+'T12:00:00').getDay();
+  return segments.filter(s=>s.worker_id===workerId &&
+    Number(s.day_of_week)===weekday &&
+    (!s.valid_from || s.valid_from<=date) &&
+    (!s.valid_until || s.valid_until>=date));
+}
+
+function calculateDay(marks,segments,workerId,date) {
+  const dayMarks=marks.filter(m=>m.worker_id===workerId && m.marked_at?.slice(0,10)===date)
+    .sort((a,b)=>new Date(a.marked_at)-new Date(b.marked_at));
+  const scheduled=chooseSchedule(segments,workerId,date);
+  const scheduledMinutes=scheduled.length
+    ? scheduled.reduce((sum,s)=>sum+Number(s.effective_work_minutes||0),0)
+    : null;
+
+  const byType={};
+  for(const m of dayMarks) if(!byType[m.mark_type]) byType[m.mark_type]=m;
+  const firstEntry=dayMarks.find(m=>m.mark_type==='entry');
+  const lastExit=[...dayMarks].reverse().find(m=>m.mark_type==='exit');
+  const breaksStart=dayMarks.find(m=>m.mark_type==='break_start');
+  const breaksEnd=dayMarks.find(m=>m.mark_type==='break_end');
+  const issues=[];
+  if(!dayMarks.length) issues.push('Sin marcaciones');
+  if(dayMarks.length && !firstEntry) issues.push('Falta entrada');
+  if(dayMarks.length && !lastExit) issues.push('Falta salida');
+  if(breaksStart && !breaksEnd) issues.push('Falta fin de refrigerio');
+  if(breaksEnd && !breaksStart) issues.push('Falta inicio de refrigerio');
+  if(!scheduled.length && dayMarks.length) issues.push('Sin horario programado');
+
+  let effective=null;
+  if(firstEntry && lastExit && new Date(lastExit.marked_at)>=new Date(firstEntry.marked_at)) {
+    effective=(new Date(lastExit.marked_at)-new Date(firstEntry.marked_at))/60000;
+    if(breaksStart && breaksEnd &&
+       new Date(breaksEnd.marked_at)>=new Date(breaksStart.marked_at)) {
+      effective-=(new Date(breaksEnd.marked_at)-new Date(breaksStart.marked_at))/60000;
+    }
+    effective=Math.max(0,Math.round(effective));
+  }
+  const overtime=effective!==null && scheduledMinutes!==null
+    ? Math.max(0,effective-scheduledMinutes) : null;
+  return {dayMarks,scheduled,scheduledMinutes,effective,overtime,issues,firstEntry,lastExit,breaksStart,breaksEnd};
+}
+
+$('exportBtn').addEventListener('click',async()=>{
+  if(currentProfile?.role!=='admin') return;
+  if(typeof XLSX==='undefined') {
+    showMessage('message','No se cargó el módulo de Excel. Revisa tu conexión e inténtalo de nuevo.',true);
+    return;
+  }
+  const from=$('exportFrom').value,to=$('exportTo').value,workerChoice=$('exportWorker').value;
+  if(!from||!to||from>to) return showMessage('message','Selecciona un rango de fechas válido.',true);
+  if(dateRange(from,to).length>=370) return showMessage('message','El rango es demasiado largo. Exporta menos de 370 días.',true);
+
+  $('exportBtn').disabled=true;
+  try {
+    const workerIds=workerChoice==='all' ? workers.map(w=>w.id) : [workerChoice];
+    const names=new Map(workers.map(w=>[w.id,w.full_name||w.id]));
+    const filters=[
+      {method:'gte',args:['marked_at',from+'T00:00:00']},
+      {method:'lt',args:['marked_at',new Date(new Date(to+'T12:00:00').getTime()+12*60*60*1000).toISOString()]}
+    ];
+    // Se recuperan las marcaciones del rango. Se descargan todas las páginas.
+    let marks=[];
+    let offset=0;
+    while(true) {
+      let q=supabase.from('attendance_marks')
+        .select('id,worker_id,mark_type,marked_at,photo_path,photo_taken_at')
+        .gte('marked_at',from+'T00:00:00')
+        .lt('marked_at',new Date(new Date(to+'T12:00:00').getTime()+12*60*60*1000).toISOString())
+        .order('marked_at')
+        .range(offset,offset+999);
+      if(workerChoice!=='all') q=q.eq('worker_id',workerChoice);
+      const {data,error}=await q;
+      if(error) throw error;
+      marks=marks.concat(data||[]);
+      if(!data||data.length<1000) break;
+      offset+=1000;
+      if(offset>50000) break;
+    }
+    const segments=await loadSegments(from,to);
+    const rows=[];
+    const dates=dateRange(from,to);
+    for(const workerId of workerIds) {
+      for(const date of dates) {
+        const r=calculateDay(marks,segments,workerId,date);
+        if(!r.dayMarks.length && !r.scheduled.length) continue;
+        const getMark=type=>r.dayMarks.filter(m=>m.mark_type===type);
+        const formatMark=(type,field)=>getMark(type).map(m=>dateTimeText(m[field])).join(' | ');
+        const photos=r.dayMarks.map(m=>m.photo_path||'').filter(Boolean).join(' | ');
+        const captured=r.dayMarks.map(m=>`${markNames[m.mark_type]||m.mark_type}: ${dateTimeText(m.photo_taken_at)}`).join(' | ');
+        rows.push({
+          Trabajador:names.get(workerId)||workerId,
+          Fecha:date,
+          Día:dayNames[new Date(date+'T12:00:00').getDay()],
+          Turno:r.scheduled.length ? r.scheduled.map(s=>`${s.start_time}–${s.end_time}`).join(' / ') : 'No asignado',
+          'Entrada registrada':formatMark('entry','marked_at'),
+          'Hora captura entrada':formatMark('entry','photo_taken_at'),
+          'Inicio refrigerio':formatMark('break_start','marked_at'),
+          'Hora captura inicio refrigerio':formatMark('break_start','photo_taken_at'),
+          'Fin refrigerio':formatMark('break_end','marked_at'),
+          'Hora captura fin refrigerio':formatMark('break_end','photo_taken_at'),
+          'Salida registrada':formatMark('exit','marked_at'),
+          'Hora captura salida':formatMark('exit','photo_taken_at'),
+          'Minutos programados':r.scheduledMinutes===null?'':r.scheduledMinutes,
+          'Horas programadas':r.scheduledMinutes===null?'':fmtMinutes(r.scheduledMinutes),
+          'Minutos efectivos':r.effective===null?'':r.effective,
+          'Horas efectivas':r.effective===null?'':fmtMinutes(r.effective),
+          'Minutos extra estimados':r.overtime===null?'':r.overtime,
+          'Horas extra estimadas':r.overtime===null?'':fmtMinutes(r.overtime),
+          'Ruta(s) foto privada':photos,
+          'Horas de captura reportadas':captured,
+          Incidencias:r.issues.join('; ')
+        });
+      }
+    }
+    if(!rows.length) {
+      showMessage('message','No se encontraron marcaciones ni turnos para ese filtro.',true);
+      return;
+    }
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws['!cols']=Object.keys(rows[0]).map(k=>({wch:Math.min(32,Math.max(14,k.length+2))}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Asistencia y horas');
+    XLSX.writeFile(wb,`TurnoControl_${from}_${to}.xlsx`);
+    showMessage('message',`Excel generado: ${rows.length} filas. Las rutas de fotos son privadas; no son enlaces públicos.`);
+  } catch(err) {
+    showMessage('message','No se pudo exportar: '+(err.message||err),true);
+  } finally {
+    $('exportBtn').disabled=false;
+  }
+});
+
+(async()=>{
+  $('validFrom').value=todayLocal();
+  $('exportFrom').value=todayLocal();
+  $('exportTo').value=todayLocal();
+  try { await restoreSession(); }
+  catch(err) {
+    showMessage('loginMessage','No se pudo recuperar la sesión: '+(err.message||err),true);
+  }
+})();
 </script>
 </body>
 </html>
