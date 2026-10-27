@@ -9,8 +9,8 @@
   "scope": "/turnocontrol-manuel11/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3f6fa",
-  "theme_color": "#123b67",
+  "background_color": "#F58220",
+  "theme_color": "#F58220",
   "icons": [
     {
       "src": "/turnocontrol-manuel11/icon.svg",
