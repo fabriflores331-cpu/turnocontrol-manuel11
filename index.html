@@ -1,475 +1,411 @@
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-PE">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f58220">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F58220">
+<meta name="description" content="Control de asistencia y horarios de Tiendas 3A, Manuel 11">
+<link rel="manifest" href="/turnocontrol-manuel11/manifest.json">
+<link rel="icon" href="/turnocontrol-manuel11/icon.svg" type="image/svg+xml">
 <title>TurnoControl · Manuel 11</title>
+
 <style>
-:root{--orange:#f58220;--blue:#123b67;--bg:#f3f6fa;--white:#fff;--text:#172334;--muted:#66758a;--line:#e2e8f0}
+:root {
+  --orange:#F58220;
+  --blue:#174A85;
+  --dark:#102D50;
+  --bg:#F3F6FA;
+  --white:#FFFFFF;
+  --text:#172334;
+  --muted:#66758A;
+  --line:#E2E8F0;
+  --green:#16834A;
+  --red:#B42318;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}
-header{background:var(--blue);color:white;padding:20px 16px;border-bottom:5px solid var(--orange)}
-header h1{margin:0;font-size:23px}header p{margin:7px 0 0;color:#dce8f7}
-main{max-width:850px;margin:auto;padding:15px;padding-bottom:100px}
-.card{background:white;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 2px 9px #102d4b0c}
-h2{font-size:19px;margin:0 0 14px}h3{font-size:16px;margin:12px 0}
-label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}
-input,select,textarea{width:100%;padding:12px;border:1px solid #ccd6e2;border-radius:9px;background:white;font-size:15px;color:var(--text)}
-button{border:0;border-radius:10px;padding:12px 15px;background:var(--orange);color:white;font-weight:700;font-size:14px;cursor:pointer}
-button.secondary{background:var(--blue)}button.light{background:#eaf1f9;color:var(--blue)}
-button.danger{background:#b42318}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;font-size:15px}
+header{background:var(--orange);color:#fff;padding:19px 17px 17px;border-bottom:5px solid var(--blue)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:12px}
+header h1{margin:0;font-size:23px}
+header p{margin:6px 0 0;font-size:13px}
+main{max-width:850px;margin:auto;padding:14px 13px 100px}
+.card{background:#fff;border:1px solid #edf0f4;border-radius:18px;padding:17px;margin-bottom:14px;box-shadow:0 3px 12px #102d5009}
+h2{font-size:19px;margin:0 0 14px;color:var(--dark)}
+h3{font-size:16px;margin:8px 0}
+p{line-height:1.45}
+label{display:block;font-size:13px;font-weight:bold;margin:13px 0 6px}
+input,select{width:100%;padding:13px;border:1px solid #ccd6e2;border-radius:11px;background:white;font-size:15px;color:var(--text)}
+button{border:0;border-radius:11px;padding:13px 15px;background:var(--orange);color:white;font-size:14px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+button.secondary{background:var(--blue)}
+button.light{background:#EAF1F9;color:var(--blue)}
+button.danger{background:var(--red)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.actions button{flex:1}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.menu button{background:white;color:var(--blue);border:1px solid var(--line);text-align:left;min-height:58px}
-.menu button span{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:5px}
-.hidden{display:none!important}.muted{color:var(--muted);font-size:13px}
-.status{padding:11px;border-radius:9px;background:#edf4fb;margin-bottom:12px;white-space:pre-wrap;overflow-wrap:anywhere}
-.item{border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0;overflow-wrap:anywhere}
-.item strong{color:var(--blue)}.tag{display:inline-block;background:#fff0df;color:#9a4b00;padding:4px 8px;border-radius:20px;font-size:12px}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:10px;z-index:5}
-nav button{flex:1;max-width:180px;padding:12px 6px}
-#message{position:sticky;top:0;z-index:8}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.menu{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:10px;padding-bottom:100px}}
+.menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.menu button{background:white;color:var(--dark);border:1px solid var(--line);text-align:left;min-height:86px;padding:13px}
+.menu button span{display:block;font-size:12px;font-weight:normal;color:var(--muted);margin-top:7px;line-height:1.4}
+.hidden{display:none!important}
+.muted{color:var(--muted);font-size:13px}
+.status{padding:12px;border-radius:11px;background:#EDF4FB;white-space:pre-wrap;overflow-wrap:anywhere}
+.item{border:1px solid var(--line);border-radius:12px;padding:13px;margin:9px 0;overflow-wrap:anywhere;line-height:1.6}
+.item strong{color:var(--blue)}
+.badge{display:inline-block;background:#FFF0DF;color:#8B4700;padding:5px 9px;border-radius:20px;font-size:12px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:9px max(10px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom))}
+nav button{flex:1;max-width:180px;padding:12px 5px}
+#message{position:sticky;top:0;z-index:8;margin:8px 0}
+hr{border:0;border-top:1px solid var(--line);margin:15px 0}
+@media(max-width:480px){main{padding:10px 10px 100px}.grid{grid-template-columns:1fr}.menu{gap:8px}.menu button{min-height:88px;padding:11px;font-size:13px}.card{padding:15px}header h1{font-size:21px}}
 </style>
 </head>
+
 <body>
 <header>
-<h1>🟠 TurnoControl</h1>
-<p>Manuel 11 · Tiendas 3A</p>
+  <div class="brand">
+    <img src="/turnocontrol-manuel11/icon.svg" alt="Logo de Tiendas 3A">
+    <div>
+      <h1>TurnoControl</h1>
+      <p>Tiendas 3A · Manuel 11</p>
+    </div>
+  </div>
 </header>
+
 <main>
-<div id="message" class="status hidden"></div>
+<div id="message" class="status hidden" role="status"></div>
 
 <section id="login" class="card">
-<h2>Ingresar a mi cuenta</h2>
-<p class="muted">Ingresa tu DNI y la contraseña asignada a tu cuenta.</p>
-<label for="dni">DNI</label>
-<input id="dni" inputmode="numeric" maxlength="8" placeholder="Tu DNI">
-<label for="password">Contraseña</label>
-<input id="password" type="password" placeholder="Tu contraseña">
-<div class="actions"><button id="loginBtn">Ingresar</button></div>
-<p class="muted">Si no puedes ingresar, solicita al administrador que verifique tu cuenta.</p>
+  <h2>Bienvenido 👋</h2>
+  <p class="muted">Ingresa con tu DNI y contraseña para continuar.</p>
+  <label for="dni">DNI</label>
+  <input id="dni" inputmode="numeric" maxlength="8" autocomplete="username" placeholder="Escribe tu DNI">
+  <label for="password">Contraseña</label>
+  <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+  <div class="actions"><button id="loginBtn">Ingresar a mi cuenta</button></div>
+  <p class="muted">¿No puedes ingresar? Comunícate con el administrador de la tienda.</p>
 </section>
 
 <section id="app" class="hidden">
-<div class="card">
-<div class="grid">
-<div><span class="muted">Usuario</span><h3 id="userName">—</h3></div>
-<div><span class="muted">Perfil</span><h3 id="userRole">—</h3></div>
-</div>
-<div class="actions"><button class="light" id="refreshBtn">Actualizar datos</button><button class="secondary" id="logoutBtn">Cerrar sesión</button></div>
-</div>
+  <section class="card">
+    <div class="grid">
+      <div><span class="muted">Hola,</span><h3 id="userName">Trabajador</h3></div>
+      <div><span class="muted">Tipo de cuenta</span><h3 id="userRole">—</h3></div>
+    </div>
+    <div class="actions">
+      <button class="light" id="refreshBtn">Actualizar</button>
+      <button class="secondary" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </section>
 
-<div class="card">
-<h2>Menú principal</h2>
-<div class="menu">
-<button data-page="home">🏠 Inicio<span>Resumen de la cuenta</span></button>
-<button data-page="mark">📸 Marcar asistencia<span>Entrada, refrigerio y salida</span></button>
-<button data-page="history">🕒 Mis marcaciones<span>Historial de asistencia</span></button>
-<button data-page="schedule">📅 Mi horario<span>Turnos programados</span></button>
-<button data-page="staff" class="admin-only">👥 Personal<span>Registrar trabajadores</span></button>
-<button data-page="shifts" class="admin-only">🗓️ Gestionar horarios<span>Asignar turnos semanales</span></button>
-<button data-page="reports" class="admin-only">📊 Informes<span>Exportar a CSV para Excel</span></button>
-</div>
-</div>
+  <section class="card">
+    <h2>Menú principal</h2>
+    <div class="menu">
+      <button data-page="home">🏠 Inicio<span>Resumen del día</span></button>
+      <button data-page="mark">📸 Marcar asistencia<span>Registrar entrada y salida</span></button>
+      <button data-page="history">🕒 Mis marcaciones<span>Ver historial</span></button>
+      <button data-page="schedule">📅 Mi horario<span>Consultar mis turnos</span></button>
+      <button class="admin-only" data-page="staff">👥 Personal<span>Gestionar trabajadores</span></button>
+      <button class="admin-only" data-page="shifts">🗓️ Horarios<span>Asignar turnos</span></button>
+      <button class="admin-only" data-page="reports">📊 Informes<span>Exportar a Excel</span></button>
+    </div>
+  </section>
 
-<section id="page-home" class="card">
-<h2>Bienvenido a TurnoControl</h2>
-<p>Registra tu asistencia y revisa tu horario desde tu celular.</p>
-<div id="summary" class="status">Cargando información…</div>
-</section>
+  <section id="page-home" class="card">
+    <h2>Resumen de asistencia</h2>
+    <p class="muted">Tus marcaciones registradas durante el día.</p>
+    <div id="summary" class="status">Cargando…</div>
+  </section>
 
-<section id="page-mark" class="card hidden">
-<h2>📸 Registrar asistencia</h2>
-<p class="muted">Selecciona el tipo de marcación y toma una fotografía. Se registra la hora que recibe el sistema.</p>
-<label for="markType">Tipo de marcación</label>
-<select id="markType">
-<option value="entry">Entrada</option>
-<option value="break_start">Inicio de refrigerio</option>
-<option value="break_end">Fin de refrigerio</option>
-<option value="exit">Salida</option>
-</select>
-<label for="photo">Fotografía obligatoria</label>
-<input id="photo" type="file" accept="image/*" capture="user">
-<p class="muted">La cámara disponible depende de tu celular y navegador.</p>
-<div class="actions"><button id="markBtn">Tomar y guardar marcación</button></div>
-</section>
+  <section id="page-mark" class="card hidden">
+    <h2>📸 Registrar asistencia</h2>
+    <p class="muted">Elige el tipo de marcación y toma una fotografía.</p>
+    <label for="markType">Tipo de marcación</label>
+    <select id="markType">
+      <option value="entry">Entrada</option>
+      <option value="break_start">Inicio de refrigerio</option>
+      <option value="break_end">Fin de refrigerio</option>
+      <option value="exit">Salida</option>
+    </select>
+    <label for="photo">Fotografía obligatoria</label>
+    <input id="photo" type="file" accept="image/*" capture="user">
+    <p class="muted">La hora registrada corresponde al momento en que el sistema recibe la marcación. No demuestra por sí sola la hora original de captura de la fotografía.</p>
+    <div class="actions"><button id="markBtn">Guardar marcación</button></div>
+  </section>
 
-<section id="page-history" class="card hidden">
-<h2>🕒 Mis marcaciones</h2>
-<div class="actions"><button class="light" id="historyBtn">Consultar historial</button></div>
-<div id="historyList"></div>
-</section>
+  <section id="page-history" class="card hidden">
+    <h2>🕒 Mis marcaciones</h2>
+    <button class="light" id="historyBtn">Consultar historial</button>
+    <div id="historyList"></div>
+  </section>
 
-<section id="page-schedule" class="card hidden">
-<h2>📅 Horario semanal</h2>
-<p class="muted">Los horarios se conservan hasta que el administrador los cambie.</p>
-<button class="light" id="scheduleBtn">Consultar horario</button>
-<div id="mySchedule"></div>
-</section>
+  <section id="page-schedule" class="card hidden">
+    <h2>📅 Mi horario</h2>
+    <button class="light" id="scheduleBtn">Consultar horario</button>
+    <div id="mySchedule"></div>
+  </section>
 
-<section id="page-staff" class="card hidden admin-only">
-<h2>👥 Personal</h2>
-<p class="muted">Crear una cuenta requiere la función segura admin-create-user desplegada en Supabase.</p>
-<label for="newDni">DNI del trabajador</label>
-<input id="newDni" inputmode="numeric" maxlength="8" placeholder="8 dígitos">
-<label for="newName">Nombres y apellidos</label>
-<input id="newName" placeholder="Nombre completo">
-<label for="newPassword">Contraseña inicial</label>
-<input id="newPassword" type="password" minlength="8" placeholder="Mínimo 8 caracteres">
-<label for="newType">Tipo de jornada</label>
-<select id="newType"><option value="full_time">Full time · 9 h incluido refrigerio</option><option value="part_time">Part time · 3 h 45 min efectivos</option></select>
-<div class="actions"><button id="createUserBtn">Crear trabajador</button><button class="light" id="staffBtn">Ver personal</button></div>
-<div id="staffList"></div>
-</section>
+  <section id="page-staff" class="card hidden admin-only">
+    <h2>👥 Registrar trabajador</h2>
+    <label for="newDni">DNI</label>
+    <input id="newDni" inputmode="numeric" maxlength="8" placeholder="8 dígitos">
+    <label for="newName">Nombres y apellidos</label>
+    <input id="newName" placeholder="Nombre completo">
+    <label for="newPassword">Contraseña inicial</label>
+    <input id="newPassword" type="password" minlength="8" placeholder="Mínimo 8 caracteres">
+    <label for="newType">Tipo de jornada</label>
+    <select id="newType">
+      <option value="full_time">Full time · 9 horas incluido refrigerio</option>
+      <option value="part_time">Part time · 3 h 45 min efectivos</option>
+    </select>
+    <div class="actions">
+      <button id="createUserBtn">Crear trabajador</button>
+      <button class="light" id="staffBtn">Ver personal</button>
+    </div>
+    <div id="staffList"></div>
+  </section>
 
-<section id="page-shifts" class="card hidden admin-only">
-<h2>🗓️ Asignar horario semanal</h2>
-<label for="shiftWorker">Trabajador</label>
-<select id="shiftWorker"></select>
-<label for="shiftDay">Día</label>
-<select id="shiftDay">
-<option value="1">Lunes</option><option value="2">Martes</option>
-<option value="3">Miércoles</option><option value="4">Jueves</option>
-<option value="5">Viernes</option><option value="6">Sábado</option>
-<option value="0">Domingo</option>
-</select>
-<label for="shiftStart">Inicio del turno 1</label><input id="shiftStart" type="time" value="08:00">
-<label for="shiftEnd">Fin del turno 1</label><input id="shiftEnd" type="time" value="17:00">
-<label for="shiftStart2">Inicio del turno 2 (opcional)</label><input id="shiftStart2" type="time">
-<label for="shiftEnd2">Fin del turno 2 (opcional)</label><input id="shiftEnd2" type="time">
-<label for="shiftBreak">Refrigerio en minutos</label><input id="shiftBreak" type="number" min="0" value="60">
-<label for="shiftFrom">Vigente desde</label><input id="shiftFrom" type="date">
-<label for="shiftNote">Nota (opcional)</label><input id="shiftNote" placeholder="Observaciones">
-<div class="actions"><button id="saveShiftBtn">Guardar horario</button></div>
-<p class="muted">Cada cambio debe tener su fecha de inicio. No borres horarios anteriores: conserva el historial.</p>
-</section>
+  <section id="page-shifts" class="card hidden admin-only">
+    <h2>🗓️ Asignar horario</h2>
+    <label for="shiftWorker">Trabajador</label>
+    <select id="shiftWorker"></select>
+    <label for="shiftDay">Día de la semana</label>
+    <select id="shiftDay">
+      <option value="1">Lunes</option><option value="2">Martes</option>
+      <option value="3">Miércoles</option><option value="4">Jueves</option>
+      <option value="5">Viernes</option><option value="6">Sábado</option>
+      <option value="0">Domingo</option>
+    </select>
+    <label for="shiftStart">Inicio del primer turno</label><input id="shiftStart" type="time" value="08:00">
+    <label for="shiftEnd">Fin del primer turno</label><input id="shiftEnd" type="time" value="17:00">
+    <label for="shiftStart2">Inicio del segundo turno (opcional)</label><input id="shiftStart2" type="time">
+    <label for="shiftEnd2">Fin del segundo turno (opcional)</label><input id="shiftEnd2" type="time">
+    <label for="shiftBreak">Refrigerio en minutos</label><input id="shiftBreak" type="number" min="0" value="60">
+    <label for="shiftFrom">Vigente desde</label><input id="shiftFrom" type="date">
+    <div class="actions"><button id="saveShiftBtn">Guardar horario</button></div>
+    <p class="muted">Verifica las horas efectivas y los descansos antes de asignar el horario.</p>
+  </section>
 
-<section id="page-reports" class="card hidden admin-only">
-<h2>📊 Exportar marcaciones</h2>
-<label for="dateFrom">Desde</label><input id="dateFrom" type="date">
-<label for="dateTo">Hasta</label><input id="dateTo" type="date">
-<label for="reportWorker">Trabajador</label><select id="reportWorker"><option value="all">Todo el personal</option></select>
-<div class="actions"><button id="exportBtn">Consultar y exportar CSV</button></div>
-<div id="reportStatus" class="muted"></div>
-<p class="muted">El archivo CSV se abre con Excel. Las horas extra mostradas son estimaciones y deben revisarse contra el horario vigente y las incidencias.</p>
-</section>
+  <section id="page-reports" class="card hidden admin-only">
+    <h2>📊 Informes de asistencia</h2>
+    <label for="dateFrom">Fecha desde</label><input id="dateFrom" type="date">
+    <label for="dateTo">Fecha hasta</label><input id="dateTo" type="date">
+    <label for="reportWorker">Trabajador</label><select id="reportWorker"><option value="all">Todo el personal</option></select>
+    <div class="actions"><button id="exportBtn">Exportar CSV para Excel</button></div>
+    <p id="reportStatus" class="muted"></p>
+  </section>
 </section>
 </main>
+
 <nav id="bottomNav" class="hidden">
-<button class="secondary" data-page="home">Inicio</button>
-<button data-page="mark">Marcar</button>
-<button class="light" data-page="history">Historial</button>
+  <button class="secondary" data-page="home">Inicio</button>
+  <button data-page="mark">Marcar</button>
+  <button class="light" data-page="history">Historial</button>
 </nav>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-/* Configuración pública del proyecto Supabase */
-const SUPABASE_URL = 'https://rgadrcvqvqnktwrnimpk.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8eI';
-const BUCKET = 'attendance-photos';
+const SUPABASE_URL='https://rgadrcvqvqnktwrnimpk.supabase.co';
+const SUPABASE_KEY='sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8eI';
+const BUCKET='attendance-photos';
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+let user=null,profile=null,workers=[];
 
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let user = null;
-let profile = null;
-let workers = [];
-
-const $ = id => document.getElementById(id);
-const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
-  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-}[c]));
-const isAdmin = () => profile?.role === 'admin';
-const today = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const $=id=>document.getElementById(id);
+const escapeHTML=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const admin=()=>profile?.role==='admin';
+const today=()=>{
+ const d=new Date();
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
-function notify(message, error=false) {
-  const box = $('message');
-  box.textContent = message;
-  box.classList.remove('hidden');
-  box.style.background = error ? '#fde8e7' : '#e8f6ed';
-  box.style.color = error ? '#9b1c1c' : '#17643a';
-  window.scrollTo({top:0,behavior:'smooth'});
+function notice(msg,error=false){
+ const el=$('message');el.textContent=msg;el.classList.remove('hidden');
+ el.style.background=error?'#FDE8E7':'#E8F6ED';
+ el.style.color=error?'#9B1C1C':'#17643A';
+ window.scrollTo({top:0,behavior:'smooth'});
 }
-function fail(error) {
-  console.error(error);
-  notify(error?.message || String(error), true);
+function showError(e){console.error(e);notice(e?.message||String(e),true)}
+function labelMark(t){
+ return ({entry:'Entrada',break_start:'Inicio de refrigerio',break_end:'Fin de refrigerio',exit:'Salida'})[t]||t;
 }
-function showPage(page) {
-  document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden'));
-  $('page-'+page)?.classList.remove('hidden');
+function page(name){
+ document.querySelectorAll('[id^="page-"]').forEach(el=>el.classList.add('hidden'));
+ $('page-'+name)?.classList.remove('hidden');
 }
-document.querySelectorAll('[data-page]').forEach(btn =>
-  btn.addEventListener('click', () => showPage(btn.dataset.page))
-);
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>page(b.dataset.page)));
 
-$('loginBtn').onclick = login;
-$('logoutBtn').onclick = async () => {
-  await db.auth.signOut();
-  user = profile = null;
-  $('app').classList.add('hidden');
-  $('bottomNav').classList.add('hidden');
-  $('login').classList.remove('hidden');
-  notify('Sesión cerrada.');
+$('loginBtn').onclick=login;
+$('logoutBtn').onclick=async()=>{
+ await db.auth.signOut();user=null;profile=null;
+ $('app').classList.add('hidden');$('bottomNav').classList.add('hidden');
+ $('login').classList.remove('hidden');notice('Sesión cerrada.');
 };
-$('refreshBtn').onclick = loadHome;
-$('historyBtn').onclick = loadHistory;
-$('scheduleBtn').onclick = loadMySchedule;
-$('staffBtn').onclick = loadStaff;
-$('markBtn').onclick = saveMark;
-$('createUserBtn').onclick = createWorker;
-$('saveShiftBtn').onclick = saveSchedule;
-$('exportBtn').onclick = exportReport;
+$('refreshBtn').onclick=loadHome;
+$('historyBtn').onclick=loadHistory;
+$('scheduleBtn').onclick=loadSchedule;
+$('staffBtn').onclick=loadStaff;
+$('markBtn').onclick=saveMark;
+$('createUserBtn').onclick=createWorker;
+$('saveShiftBtn').onclick=saveSchedule;
+$('exportBtn').onclick=exportReport;
 
-async function login() {
-  try {
-    const dni = $('dni').value.trim();
-    const password = $('password').value;
-    if (!/^\d{8}$/.test(dni)) throw new Error('El DNI debe tener 8 dígitos.');
-    if (!password) throw new Error('Escribe tu contraseña.');
-    $('loginBtn').disabled = true;
-    const {data,error} = await db.auth.signInWithPassword({
-      email: dni+'@login.turnocontrol.local',
-      password
-    });
-    if (error) throw error;
-    user = data.user;
-    await loadProfile();
-    $('login').classList.add('hidden');
-    $('app').classList.remove('hidden');
-    $('bottomNav').classList.remove('hidden');
-    document.querySelectorAll('.admin-only').forEach(el =>
-      el.classList.toggle('hidden', !isAdmin())
-    );
-    $('userName').textContent = profile.full_name || profile.dni;
-    $('userRole').textContent = isAdmin() ? 'Administrador' : 'Trabajador';
-    notify('Bienvenido a TurnoControl.');
-    await loadHome();
-  } catch(e) { fail(e); }
-  finally { $('loginBtn').disabled = false; }
+async function login(){
+ try{
+  const dni=$('dni').value.trim(),password=$('password').value;
+  if(!/^\d{8}$/.test(dni))throw Error('El DNI debe tener 8 dígitos.');
+  if(!password)throw Error('Escribe tu contraseña.');
+  $('loginBtn').disabled=true;
+  const {data,error}=await db.auth.signInWithPassword({email:dni+'@login.turnocontrol.local',password});
+  if(error)throw error;
+  user=data.user;
+  await loadProfile();
+  enterApp();
+  await loadHome();
+ }catch(e){showError(e)}
+ finally{$('loginBtn').disabled=false}
 }
-async function loadProfile() {
-  const {data,error} = await db.from('profiles')
-    .select('id,dni,full_name,role,employment_type,active')
-    .eq('id',user.id).single();
-  if (error) throw error;
-  if (!data || data.active === false) {
-    await db.auth.signOut();
-    throw new Error('Cuenta inactiva o perfil no encontrado.');
-  }
-  profile = data;
+async function loadProfile(){
+ const {data,error}=await db.from('profiles').select('id,dni,full_name,role,employment_type,active').eq('id',user.id).single();
+ if(error)throw error;
+ if(!data||data.active===false){await db.auth.signOut();throw Error('Cuenta inactiva o perfil no encontrado.')}
+ profile=data;
 }
-async function loadHome() {
-  try {
-    const {data,error} = await db.from('attendance_marks')
-      .select('mark_type,marked_at')
-      .eq('worker_id',profile.id)
-      .gte('marked_at',today()+'T00:00:00')
-      .order('marked_at',{ascending:true});
-    if (error) throw error;
-    $('summary').innerHTML = '<strong>Marcaciones de hoy:</strong><br>' +
-      (data.length ? data.map(m =>
-        `${esc(markLabel(m.mark_type))} · ${esc(new Date(m.marked_at).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}))}`
-      ).join('<br>') : 'Todavía no tienes marcaciones registradas hoy.');
-  } catch(e) { fail(e); }
+function enterApp(){
+ $('login').classList.add('hidden');$('app').classList.remove('hidden');$('bottomNav').classList.remove('hidden');
+ $('userName').textContent=profile.full_name||profile.dni;
+ $('userRole').textContent=admin()?'Administrador':'Trabajador';
+ document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',!admin()));
 }
-function markLabel(type) {
-  return ({entry:'Entrada',break_start:'Inicio de refrigerio',
-    break_end:'Fin de refrigerio',exit:'Salida'})[type] || type;
+async function loadHome(){
+ try{
+  const {data,error}=await db.from('attendance_marks').select('mark_type,marked_at').eq('worker_id',profile.id).gte('marked_at',today()+'T00:00:00').order('marked_at');
+  if(error)throw error;
+  $('summary').innerHTML='<strong>Marcaciones de hoy</strong><br>'+
+   (data.length?data.map(m=>`${escapeHTML(labelMark(m.mark_type))} · ${escapeHTML(new Date(m.marked_at).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}))}`).join('<br>'):'Aún no hay marcaciones registradas hoy.');
+ }catch(e){showError(e)}
 }
-async function saveMark() {
-  try {
-    const file = $('photo').files[0];
-    if (!file) throw new Error('Debes tomar o seleccionar una fotografía.');
-    if (!file.type.startsWith('image/')) throw new Error('El archivo debe ser una imagen.');
-    if (file.size > 10*1024*1024) throw new Error('La imagen debe pesar menos de 10 MB.');
-    const type = $('markType').value;
-    $('markBtn').disabled = true;
-    const stamp = new Date().toISOString().replace(/[:.]/g,'-');
-    const path = `${profile.id}/${stamp}-${type}.jpg`;
-    const {error:uploadError} = await db.storage.from(BUCKET).upload(path,file,{
-      contentType:file.type,upsert:false
-    });
-    if (uploadError) throw uploadError;
-    const now = new Date().toISOString();
-    const {error} = await db.from('attendance_marks').insert({
-      worker_id:profile.id,
-      mark_type:type,
-      marked_at:now,
-      photo_path:path,
-      photo_taken_at:now
-    });
-    if (error) throw error;
-    $('photo').value = '';
-    notify('Marcación guardada: '+markLabel(type)+'.');
-    await loadHome();
-    await loadHistory();
-  } catch(e) { fail(e); }
-  finally { $('markBtn').disabled = false; }
+async function saveMark(){
+ try{
+  const file=$('photo').files[0],type=$('markType').value;
+  if(!file)throw Error('Debes tomar o seleccionar una fotografía.');
+  if(!file.type.startsWith('image/'))throw Error('Selecciona un archivo de imagen.');
+  if(file.size>10*1024*1024)throw Error('La imagen debe pesar menos de 10 MB.');
+  $('markBtn').disabled=true;
+  const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+  const path=`${profile.id}/${stamp}-${type}.${file.name.split('.').pop().replace(/[^a-zA-Z0-9]/g,'')||'jpg'}`;
+  const {error:upError}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+  if(upError)throw upError;
+  const {error}=await db.from('attendance_marks').insert({
+   worker_id:profile.id,mark_type:type,marked_at:new Date().toISOString(),photo_path:path
+  });
+  if(error)throw error;
+  $('photo').value='';notice('Marcación guardada correctamente.');
+  await loadHome();await loadHistory();
+ }catch(e){showError(e)}
+ finally{$('markBtn').disabled=false}
 }
-async function loadHistory() {
-  try {
-    const {data,error} = await db.from('attendance_marks')
-      .select('id,mark_type,marked_at,photo_path')
-      .eq('worker_id',profile.id)
-      .order('marked_at',{ascending:false}).limit(100);
-    if (error) throw error;
-    $('historyList').innerHTML = data.length ? data.map(m =>
-      `<div class="item"><strong>${esc(markLabel(m.mark_type))}</strong><br>${esc(new Date(m.marked_at).toLocaleString('es-PE'))}<br><span class="muted">Fotografía guardada de forma privada</span></div>`
-    ).join('') : '<p class="muted">No hay marcaciones registradas.</p>';
-  } catch(e) { fail(e); }
+async function loadHistory(){
+ try{
+  const {data,error}=await db.from('attendance_marks').select('mark_type,marked_at,photo_path').eq('worker_id',profile.id).order('marked_at',{ascending:false}).limit(100);
+  if(error)throw error;
+  $('historyList').innerHTML=data.length?data.map(m=>`<div class="item"><strong>${escapeHTML(labelMark(m.mark_type))}</strong><br>${escapeHTML(new Date(m.marked_at).toLocaleString('es-PE'))}<br><span class="muted">Fotografía privada registrada</span></div>`).join(''):'<p class="muted">No hay marcaciones registradas.</p>';
+ }catch(e){showError(e)}
 }
-async function loadMySchedule() {
-  try {
-    const {data,error} = await db.from('schedule_segments')
-      .select('day_of_week,segment_order,start_time,end_time,effective_work_minutes,valid_from,valid_until')
-      .eq('worker_id',profile.id)
-      .lte('valid_from',today())
-      .order('day_of_week').order('segment_order');
-    if (error) throw error;
-    const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-    $('mySchedule').innerHTML = data.length ? data.map(s =>
-      `<div class="item"><strong>${days[s.day_of_week]}</strong><br>${esc(s.start_time)} – ${esc(s.end_time)}<br><span class="muted">Vigente desde ${esc(s.valid_from)}${s.valid_until?' hasta '+esc(s.valid_until):''}</span></div>`
-    ).join('') : '<p class="muted">No se encontraron horarios vigentes. Consulta al administrador.</p>';
-  } catch(e) { fail(e); }
+async function loadSchedule(){
+ try{
+  const {data,error}=await db.from('schedule_segments').select('day_of_week,segment_order,start_time,end_time,effective_work_minutes,valid_from,valid_until').eq('worker_id',profile.id).lte('valid_from',today()).order('day_of_week').order('segment_order');
+  if(error)throw error;
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  $('mySchedule').innerHTML=data.length?data.map(s=>`<div class="item"><strong>${days[s.day_of_week]}</strong><br>${escapeHTML(s.start_time)} – ${escapeHTML(s.end_time)}<br><span class="muted">Vigente desde ${escapeHTML(s.valid_from)}${s.valid_until?' hasta '+escapeHTML(s.valid_until):''}</span></div>`).join(''):'<p class="muted">No se encontraron horarios. Consulta al administrador.</p>';
+ }catch(e){showError(e)}
 }
-async function loadStaff() {
-  try {
-    const {data,error} = await db.from('profiles')
-      .select('id,dni,full_name,role,employment_type,active')
-      .order('full_name');
-    if (error) throw error;
-    workers = data || [];
-    $('staffList').innerHTML = workers.map(w =>
-      `<div class="item"><strong>${esc(w.full_name)}</strong><br>DNI: ${esc(w.dni)}<br>${esc(w.employment_type||'Jornada no indicada')} · ${w.active?'Activo':'Inactivo'}</div>`
-    ).join('') || '<p>No hay trabajadores.</p>';
-    const options = workers.filter(w => w.active && w.role !== 'admin').map(w =>
-      `<option value="${esc(w.id)}">${esc(w.full_name)} · ${esc(w.dni)}</option>`
-    ).join('');
-    $('shiftWorker').innerHTML = options;
-    $('reportWorker').innerHTML = '<option value="all">Todo el personal</option>'+options;
-  } catch(e) { fail(e); }
+async function loadStaff(){
+ try{
+  const {data,error}=await db.from('profiles').select('id,dni,full_name,role,employment_type,active').order('full_name');
+  if(error)throw error;
+  workers=data||[];
+  $('staffList').innerHTML=workers.map(w=>`<div class="item"><strong>${escapeHTML(w.full_name)}</strong><br>DNI: ${escapeHTML(w.dni)}<br>${escapeHTML(w.employment_type||'Jornada no indicada')} · ${w.active?'Activo':'Inactivo'}</div>`).join('')||'<p>No hay trabajadores.</p>';
+  const options=workers.filter(w=>w.active&&w.role!=='admin').map(w=>`<option value="${escapeHTML(w.id)}">${escapeHTML(w.full_name)} · ${escapeHTML(w.dni)}</option>`).join('');
+  $('shiftWorker').innerHTML=options;
+  $('reportWorker').innerHTML='<option value="all">Todo el personal</option>'+options;
+ }catch(e){showError(e)}
 }
-async function createWorker() {
-  try {
-    if (!isAdmin()) throw new Error('No tienes permisos de administrador.');
-    const dni = $('newDni').value.trim();
-    const name = $('newName').value.trim();
-    const password = $('newPassword').value;
-    if (!/^\d{8}$/.test(dni)) throw new Error('El DNI debe tener 8 dígitos.');
-    if (!name) throw new Error('Escribe el nombre completo.');
-    if (password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
-    const {data:{session}} = await db.auth.getSession();
-    const {data,error} = await db.functions.invoke('admin-create-user',{
-      body:{dni,full_name:name,password,employment_type:$('newType').value},
-      headers:{Authorization:'Bearer '+session.access_token}
-    });
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
-    notify('Trabajador creado correctamente.');
-    $('newDni').value=''; $('newName').value=''; $('newPassword').value='';
-    await loadStaff();
-  } catch(e) { fail(e); }
+async function createWorker(){
+ try{
+  if(!admin())throw Error('Solo el administrador puede crear trabajadores.');
+  const dni=$('newDni').value.trim(),name=$('newName').value.trim(),password=$('newPassword').value;
+  if(!/^\d{8}$/.test(dni))throw Error('El DNI debe tener 8 dígitos.');
+  if(!name)throw Error('Escribe el nombre completo.');
+  if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
+  const {data:{session}}=await db.auth.getSession();
+  const {data,error}=await db.functions.invoke('admin-create-user',{
+   body:{dni,full_name:name,password,employment_type:$('newType').value},
+   headers:{Authorization:'Bearer '+session.access_token}
+  });
+  if(error)throw error;
+  if(data?.error)throw Error(data.error);
+  notice('Trabajador creado correctamente.');
+  $('newDni').value='';$('newName').value='';$('newPassword').value='';
+  await loadStaff();
+ }catch(e){showError(e)}
 }
-async function saveSchedule() {
-  try {
-    if (!isAdmin()) throw new Error('Acceso exclusivo para administrador.');
-    const worker = $('shiftWorker').value;
-    const day = Number($('shiftDay').value);
-    const start = $('shiftStart').value;
-    const end = $('shiftEnd').value;
-    const start2 = $('shiftStart2').value;
-    const end2 = $('shiftEnd2').value;
-    const from = $('shiftFrom').value || today();
-    const breakMinutes = Number($('shiftBreak').value);
-    if (!worker) throw new Error('Selecciona un trabajador.');
-    if (!start || !end || start >= end) throw new Error('Revisa el inicio y fin del primer turno.');
-    if ((start2 && !end2) || (!start2 && end2)) throw new Error('Completa ambos horarios del segundo turno.');
-    if (start2 && start2 >= end2) throw new Error('Revisa el segundo turno.');
-    if (breakMinutes < 0) throw new Error('El refrigerio no puede ser negativo.');
-    const {error:closeError} = await db.from('schedule_segments')
-      .update({valid_until:previousDay(from)})
-      .eq('worker_id',worker).eq('day_of_week',day)
-      .is('valid_until',null).lt('valid_from',from);
-    if (closeError) throw closeError;
-    const segments = [{segment_order:1,start_time:start,end_time:end,
-      effective_work_minutes:minutesBetween(start,end)-breakMinutes}];
-    if (start2) segments.push({segment_order:2,start_time:start2,end_time:end2,
-      effective_work_minutes:minutesBetween(start2,end2)});
-    const rows = segments.map(s => ({
-      worker_id:worker,day_of_week:day,segment_order:s.segment_order,
-      start_time:s.start_time,end_time:s.end_time,
-      effective_work_minutes:Math.max(0,s.effective_work_minutes),
-      valid_from:from,valid_until:null,created_by:profile.id
-    }));
-    const {error} = await db.from('schedule_segments').insert(rows);
-    if (error) throw error;
-    notify('Horario guardado. Verifica que aparezca en la consulta del trabajador.');
-  } catch(e) { fail(e); }
+function minutesBetween(a,b){
+ const [ah,am]=a.split(':').map(Number),[bh,bm]=b.split(':').map(Number);
+ return bh*60+bm-ah*60-am;
 }
-function previousDay(date) {
-  const d = new Date(date+'T12:00:00');
-  d.setDate(d.getDate()-1);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function previousDay(date){
+ const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-function minutesBetween(a,b) {
-  const [ah,am]=a.split(':').map(Number),[bh,bm]=b.split(':').map(Number);
-  return bh*60+bm-ah*60-am;
+async function saveSchedule(){
+ try{
+  if(!admin())throw Error('Solo el administrador puede asignar horarios.');
+  const worker=$('shiftWorker').value,day=Number($('shiftDay').value),start=$('shiftStart').value,end=$('shiftEnd').value;
+  const start2=$('shiftStart2').value,end2=$('shiftEnd2').value,from=$('shiftFrom').value||today(),br=Number($('shiftBreak').value);
+  if(!worker)throw Error('Selecciona un trabajador.');
+  if(!start||!end||start>=end)throw Error('Revisa el primer turno.');
+  if((start2&&!end2)||(!start2&&end2))throw Error('Completa ambos campos del segundo turno.');
+  if(start2&&start2>=end2)throw Error('Revisa el segundo turno.');
+  if(br<0)throw Error('El refrigerio no puede ser negativo.');
+  const {error:closeError}=await db.from('schedule_segments').update({valid_until:previousDay(from)}).eq('worker_id',worker).eq('day_of_week',day).is('valid_until',null).lt('valid_from',from);
+  if(closeError)throw closeError;
+  const rows=[{segment_order:1,start_time:start,end_time:end,effective_work_minutes:Math.max(0,minutesBetween(start,end)-br)}];
+  if(start2)rows.push({segment_order:2,start_time:start2,end_time:end2,effective_work_minutes:Math.max(0,minutesBetween(start2,end2))});
+  const {error}=await db.from('schedule_segments').insert(rows.map(s=>({...s,worker_id:worker,day_of_week:day,valid_from:from,valid_until:null,created_by:profile.id})));
+  if(error)throw error;
+  notice('Horario guardado. Verifica los turnos y las horas efectivas.');
+ }catch(e){showError(e)}
 }
-async function exportReport() {
-  try {
-    if (!isAdmin()) throw new Error('Acceso exclusivo para administrador.');
-    const from = $('dateFrom').value;
-    const to = $('dateTo').value;
-    if (!from || !to || from > to) throw new Error('Selecciona un rango de fechas válido.');
-    let query = db.from('attendance_marks')
-      .select('worker_id,mark_type,marked_at,photo_path')
-      .gte('marked_at',from+'T00:00:00')
-      .lte('marked_at',to+'T23:59:59.999')
-      .order('marked_at');
-    if ($('reportWorker').value !== 'all') query=query.eq('worker_id',$('reportWorker').value);
-    const {data,error} = await query;
-    if (error) throw error;
-    const ids = [...new Set((data||[]).map(m=>m.worker_id))];
-    const people = workers.filter(w=>ids.includes(w.id));
-    const names = Object.fromEntries(people.map(w=>[w.id,w.full_name]));
-    const headers = ['DNI','Trabajador','Fecha y hora','Tipo de marcación','Ruta privada de fotografía'];
-    const rows = (data||[]).map(m=>{
-      const w=people.find(x=>x.id===m.worker_id);
-      return [w?.dni||'',names[m.worker_id]||'Usuario',new Date(m.marked_at).toLocaleString('es-PE'),markLabel(m.mark_type),m.photo_path||''];
-    });
-    const csv = [headers,...rows].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
-    const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=`TurnoControl_${from}_${to}.csv`;a.click();
-    URL.revokeObjectURL(url);
-    $('reportStatus').textContent=`Exportación generada: ${(data||[]).length} marcaciones.`;
-  } catch(e) { fail(e); }
+async function exportReport(){
+ try{
+  if(!admin())throw Error('Solo el administrador puede exportar informes.');
+  const from=$('dateFrom').value,to=$('dateTo').value;
+  if(!from||!to||from>to)throw Error('Selecciona un rango de fechas válido.');
+  if(!workers.length)await loadStaff();
+  let query=db.from('attendance_marks').select('worker_id,mark_type,marked_at,photo_path').gte('marked_at',from+'T00:00:00').lte('marked_at',to+'T23:59:59.999').order('marked_at');
+  if($('reportWorker').value!=='all')query=query.eq('worker_id',$('reportWorker').value);
+  const {data,error}=await query;if(error)throw error;
+  const people=Object.fromEntries(workers.map(w=>[w.id,w]));
+  const rows=[['DNI','Trabajador','Fecha y hora','Marcación','Ruta privada de fotografía'],...(data||[]).map(m=>{
+   const w=people[m.worker_id];
+   return [w?.dni||'',w?.full_name||'',new Date(m.marked_at).toLocaleString('es-PE'),labelMark(m.mark_type),m.photo_path||''];
+  })];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`TurnoControl_${from}_${to}.csv`;a.click();URL.revokeObjectURL(url);
+  $('reportStatus').textContent=`Archivo generado: ${(data||[]).length} marcaciones.`;
+ }catch(e){showError(e)}
 }
-
-async function start() {
-  $('shiftFrom').value=today();
-  $('dateFrom').value=today();
-  $('dateTo').value=today();
-  const {data:{session}} = await db.auth.getSession();
-  if (session) {
-    user=session.user;
-    try {
-      await loadProfile();
-      $('login').classList.add('hidden');
-      $('app').classList.remove('hidden');
-      $('bottomNav').classList.remove('hidden');
-      document.querySelectorAll('.admin-only').forEach(el =>
-        el.classList.toggle('hidden',!isAdmin())
-      );
-      $('userName').textContent=profile.full_name||profile.dni;
-      $('userRole').textContent=isAdmin()?'Administrador':'Trabajador';
-      await loadHome();
-    } catch(e) { fail(e); }
-  }
+async function start(){
+ $('shiftFrom').value=today();$('dateFrom').value=today();$('dateTo').value=today();
+ const {data:{session}}=await db.auth.getSession();
+ if(session){
+  user=session.user;
+  try{await loadProfile();enterApp();await loadHome()}catch(e){showError(e)}
+ }
 }
 start();
 </script>
