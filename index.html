@@ -210,38 +210,62 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL='https://rgadrcvqvqnktwrnimpk.supabase.co';
 const SUPABASE_KEY='sb_publishable_eUosdY-2YDNGPw6AIxjhhQ_g_dSV8eI';
 const BUCKET='attendance-photos';
+
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null,profile=null,workers=[];
 
 const $=id=>document.getElementById(id);
 const escapeHTML=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const admin=()=>profile?.role==='admin';
+
 const today=()=>{
  const d=new Date();
  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
+
 function notice(msg,error=false){
- const el=$('message');el.textContent=msg;el.classList.remove('hidden');
+ const el=$('message');
+ el.textContent=msg;
+ el.classList.remove('hidden');
  el.style.background=error?'#FDE8E7':'#E8F6ED';
  el.style.color=error?'#9B1C1C':'#17643A';
  window.scrollTo({top:0,behavior:'smooth'});
 }
-function showError(e){console.error(e);notice(e?.message||String(e),true)}
+
+function showError(e){
+ console.error(e);
+ notice(e?.message||String(e),true);
+}
+
 function labelMark(t){
  return ({entry:'Entrada',break_start:'Inicio de refrigerio',break_end:'Fin de refrigerio',exit:'Salida'})[t]||t;
 }
+
 function page(name){
+ if(!profile)return;
+ if(['staff','shifts','reports'].includes(name)&&!admin()){
+  notice('No tienes permiso para acceder a esa sección.',true);
+  return;
+ }
  document.querySelectorAll('[id^="page-"]').forEach(el=>el.classList.add('hidden'));
  $('page-'+name)?.classList.remove('hidden');
 }
+
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>page(b.dataset.page)));
 
 $('loginBtn').onclick=login;
+
 $('logoutBtn').onclick=async()=>{
- await db.auth.signOut();user=null;profile=null;
- $('app').classList.add('hidden');$('bottomNav').classList.add('hidden');
- $('login').classList.remove('hidden');notice('Sesión cerrada.');
+ await db.auth.signOut();
+ user=null;
+ profile=null;
+ $('app').classList.add('hidden');
+ $('bottomNav').classList.add('hidden');
+ $('login').classList.remove('hidden');
+ $('password').value='';
+ notice('Sesión cerrada.');
 };
+
 $('refreshBtn').onclick=loadHome;
 $('historyBtn').onclick=loadHistory;
 $('scheduleBtn').onclick=loadSchedule;
@@ -253,160 +277,429 @@ $('exportBtn').onclick=exportReport;
 
 async function login(){
  try{
-  const dni=$('dni').value.trim(),password=$('password').value;
-  if(!/^\d{8}$/.test(dni))throw Error('El DNI debe tener 8 dígitos.');
-  if(!password)throw Error('Escribe tu contraseña.');
+  const dni=$('dni').value.trim();
+  const password=$('password').value;
+
+  if(!/^\d{8}$/.test(dni)){
+   throw Error('El DNI debe tener 8 dígitos.');
+  }
+
+  if(!password){
+   throw Error('Escribe tu contraseña.');
+  }
+
   $('loginBtn').disabled=true;
-  const {data,error}=await db.auth.signInWithPassword({email:dni+'@login.turnocontrol.local',password});
-  if(error)throw error;
-  user=data.user;
+  $('message').classList.add('hidden');
+
+  // La función de Supabase busca el DNI en el servidor y valida la contraseña.
+  const {data,error}=await db.functions.invoke('login-by-dni',{
+   body:{dni,password}
+  });
+
+  if(error){
+   throw Error('No se pudo iniciar sesión. Verifica que login-by-dni esté desplegada y permita solicitudes sin sesión.');
+  }
+
+  if(data?.error){
+   throw Error(data.error);
+  }
+
+  if(!data?.access_token||!data?.refresh_token){
+   throw Error('La función de inicio de sesión no devolvió una sesión válida.');
+  }
+
+  const {data:sessionData,error:sessionError}=await db.auth.setSession({
+   access_token:data.access_token,
+   refresh_token:data.refresh_token
+  });
+
+  if(sessionError)throw sessionError;
+
+  user=sessionData.user;
   await loadProfile();
   enterApp();
   await loadHome();
- }catch(e){showError(e)}
- finally{$('loginBtn').disabled=false}
+
+ }catch(e){
+  showError(e);
+ }finally{
+  $('loginBtn').disabled=false;
+ }
 }
+
 async function loadProfile(){
- const {data,error}=await db.from('profiles').select('id,dni,full_name,role,employment_type,active').eq('id',user.id).single();
+ const {data,error}=await db.from('profiles')
+  .select('id,dni,full_name,role,employment_type,active')
+  .eq('id',user.id)
+  .single();
+
  if(error)throw error;
- if(!data||data.active===false){await db.auth.signOut();throw Error('Cuenta inactiva o perfil no encontrado.')}
+
+ if(!data||data.active===false){
+  await db.auth.signOut();
+  throw Error('Cuenta inactiva o perfil no encontrado.');
+ }
+
  profile=data;
 }
+
 function enterApp(){
- $('login').classList.add('hidden');$('app').classList.remove('hidden');$('bottomNav').classList.remove('hidden');
+ $('login').classList.add('hidden');
+ $('app').classList.remove('hidden');
+ $('bottomNav').classList.remove('hidden');
  $('userName').textContent=profile.full_name||profile.dni;
  $('userRole').textContent=admin()?'Administrador':'Trabajador';
- document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',!admin()));
+
+ document.querySelectorAll('.admin-only').forEach(el=>{
+  el.classList.toggle('hidden',!admin());
+ });
+
+ page('home');
 }
+
 async function loadHome(){
  try{
-  const {data,error}=await db.from('attendance_marks').select('mark_type,marked_at').eq('worker_id',profile.id).gte('marked_at',today()+'T00:00:00').order('marked_at');
+  if(!profile)return;
+
+  const {data,error}=await db.from('attendance_marks')
+   .select('mark_type,marked_at')
+   .eq('worker_id',profile.id)
+   .gte('marked_at',today()+'T00:00:00')
+   .order('marked_at');
+
   if(error)throw error;
+
   $('summary').innerHTML='<strong>Marcaciones de hoy</strong><br>'+
-   (data.length?data.map(m=>`${escapeHTML(labelMark(m.mark_type))} · ${escapeHTML(new Date(m.marked_at).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}))}`).join('<br>'):'Aún no hay marcaciones registradas hoy.');
- }catch(e){showError(e)}
+   (data.length
+    ?data.map(m=>`${escapeHTML(labelMark(m.mark_type))} · ${escapeHTML(new Date(m.marked_at).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}))}`).join('<br>')
+    :'Aún no hay marcaciones registradas hoy.');
+ }catch(e){
+  showError(e);
+ }
 }
+
 async function saveMark(){
  try{
-  const file=$('photo').files[0],type=$('markType').value;
+  if(!profile)throw Error('Inicia sesión antes de marcar asistencia.');
+
+  const file=$('photo').files[0];
+  const type=$('markType').value;
+
   if(!file)throw Error('Debes tomar o seleccionar una fotografía.');
   if(!file.type.startsWith('image/'))throw Error('Selecciona un archivo de imagen.');
   if(file.size>10*1024*1024)throw Error('La imagen debe pesar menos de 10 MB.');
+
   $('markBtn').disabled=true;
+
   const stamp=new Date().toISOString().replace(/[:.]/g,'-');
-  const path=`${profile.id}/${stamp}-${type}.${file.name.split('.').pop().replace(/[^a-zA-Z0-9]/g,'')||'jpg'}`;
-  const {error:upError}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
-  if(upError)throw upError;
-  const {error}=await db.from('attendance_marks').insert({
-   worker_id:profile.id,mark_type:type,marked_at:new Date().toISOString(),photo_path:path
+  const ext=(file.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'')||'jpg';
+  const path=`${profile.id}/${stamp}-${type}.${ext}`;
+
+  const {error:upError}=await db.storage.from(BUCKET).upload(path,file,{
+   contentType:file.type,
+   upsert:false
   });
+
+  if(upError)throw upError;
+
+  const {error}=await db.from('attendance_marks').insert({
+   worker_id:profile.id,
+   mark_type:type,
+   marked_at:new Date().toISOString(),
+   photo_path:path
+  });
+
   if(error)throw error;
-  $('photo').value='';notice('Marcación guardada correctamente.');
-  await loadHome();await loadHistory();
- }catch(e){showError(e)}
- finally{$('markBtn').disabled=false}
+
+  $('photo').value='';
+  notice('Marcación guardada correctamente.');
+  await loadHome();
+  await loadHistory();
+
+ }catch(e){
+  showError(e);
+ }finally{
+  $('markBtn').disabled=false;
+ }
 }
+
 async function loadHistory(){
  try{
-  const {data,error}=await db.from('attendance_marks').select('mark_type,marked_at,photo_path').eq('worker_id',profile.id).order('marked_at',{ascending:false}).limit(100);
+  if(!profile)return;
+
+  const {data,error}=await db.from('attendance_marks')
+   .select('mark_type,marked_at,photo_path')
+   .eq('worker_id',profile.id)
+   .order('marked_at',{ascending:false})
+   .limit(100);
+
   if(error)throw error;
-  $('historyList').innerHTML=data.length?data.map(m=>`<div class="item"><strong>${escapeHTML(labelMark(m.mark_type))}</strong><br>${escapeHTML(new Date(m.marked_at).toLocaleString('es-PE'))}<br><span class="muted">Fotografía privada registrada</span></div>`).join(''):'<p class="muted">No hay marcaciones registradas.</p>';
- }catch(e){showError(e)}
+
+  $('historyList').innerHTML=data.length
+   ?data.map(m=>`<div class="item"><strong>${escapeHTML(labelMark(m.mark_type))}</strong><br>${escapeHTML(new Date(m.marked_at).toLocaleString('es-PE'))}<br><span class="muted">Fotografía privada registrada</span></div>`).join('')
+   :'<p class="muted">No hay marcaciones registradas.</p>';
+
+ }catch(e){
+  showError(e);
+ }
 }
+
 async function loadSchedule(){
  try{
-  const {data,error}=await db.from('schedule_segments').select('day_of_week,segment_order,start_time,end_time,effective_work_minutes,valid_from,valid_until').eq('worker_id',profile.id).lte('valid_from',today()).order('day_of_week').order('segment_order');
+  if(!profile)return;
+
+  const {data,error}=await db.from('schedule_segments')
+   .select('day_of_week,segment_order,start_time,end_time,effective_work_minutes,valid_from,valid_until')
+   .eq('worker_id',profile.id)
+   .lte('valid_from',today())
+   .order('day_of_week')
+   .order('segment_order');
+
   if(error)throw error;
+
   const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  $('mySchedule').innerHTML=data.length?data.map(s=>`<div class="item"><strong>${days[s.day_of_week]}</strong><br>${escapeHTML(s.start_time)} – ${escapeHTML(s.end_time)}<br><span class="muted">Vigente desde ${escapeHTML(s.valid_from)}${s.valid_until?' hasta '+escapeHTML(s.valid_until):''}</span></div>`).join(''):'<p class="muted">No se encontraron horarios. Consulta al administrador.</p>';
- }catch(e){showError(e)}
+
+  $('mySchedule').innerHTML=data.length
+   ?data.map(s=>`<div class="item"><strong>${days[s.day_of_week]}</strong><br>${escapeHTML(s.start_time)} – ${escapeHTML(s.end_time)}<br><span class="muted">Vigente desde ${escapeHTML(s.valid_from)}${s.valid_until?' hasta '+escapeHTML(s.valid_until):''}</span></div>`).join('')
+   :'<p class="muted">No se encontraron horarios. Consulta al administrador.</p>';
+
+ }catch(e){
+  showError(e);
+ }
 }
+
 async function loadStaff(){
  try{
-  const {data,error}=await db.from('profiles').select('id,dni,full_name,role,employment_type,active').order('full_name');
+  if(!admin())throw Error('Solo el administrador puede ver el personal.');
+
+  const {data,error}=await db.from('profiles')
+   .select('id,dni,full_name,role,employment_type,active')
+   .order('full_name');
+
   if(error)throw error;
+
   workers=data||[];
-  $('staffList').innerHTML=workers.map(w=>`<div class="item"><strong>${escapeHTML(w.full_name)}</strong><br>DNI: ${escapeHTML(w.dni)}<br>${escapeHTML(w.employment_type||'Jornada no indicada')} · ${w.active?'Activo':'Inactivo'}</div>`).join('')||'<p>No hay trabajadores.</p>';
-  const options=workers.filter(w=>w.active&&w.role!=='admin').map(w=>`<option value="${escapeHTML(w.id)}">${escapeHTML(w.full_name)} · ${escapeHTML(w.dni)}</option>`).join('');
+
+  $('staffList').innerHTML=workers.map(w=>
+   `<div class="item"><strong>${escapeHTML(w.full_name)}</strong><br>DNI: ${escapeHTML(w.dni)}<br>${escapeHTML(w.employment_type||'Jornada no indicada')} · ${w.active?'Activo':'Inactivo'}</div>`
+  ).join('')||'<p>No hay trabajadores.</p>';
+
+  const options=workers
+   .filter(w=>w.active&&w.role!=='admin')
+   .map(w=>`<option value="${escapeHTML(w.id)}">${escapeHTML(w.full_name)} · ${escapeHTML(w.dni)}</option>`)
+   .join('');
+
   $('shiftWorker').innerHTML=options;
   $('reportWorker').innerHTML='<option value="all">Todo el personal</option>'+options;
- }catch(e){showError(e)}
+
+ }catch(e){
+  showError(e);
+ }
 }
+
 async function createWorker(){
  try{
   if(!admin())throw Error('Solo el administrador puede crear trabajadores.');
-  const dni=$('newDni').value.trim(),name=$('newName').value.trim(),password=$('newPassword').value;
+
+  const dni=$('newDni').value.trim();
+  const name=$('newName').value.trim();
+  const password=$('newPassword').value;
+
   if(!/^\d{8}$/.test(dni))throw Error('El DNI debe tener 8 dígitos.');
   if(!name)throw Error('Escribe el nombre completo.');
   if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
+
   const {data:{session}}=await db.auth.getSession();
+  if(!session)throw Error('Tu sesión ha caducado. Inicia sesión de nuevo.');
+
   const {data,error}=await db.functions.invoke('admin-create-user',{
-   body:{dni,full_name:name,password,employment_type:$('newType').value},
+   body:{
+    dni,
+    full_name:name,
+    password,
+    employment_type:$('newType').value
+   },
    headers:{Authorization:'Bearer '+session.access_token}
   });
+
   if(error)throw error;
   if(data?.error)throw Error(data.error);
+
   notice('Trabajador creado correctamente.');
-  $('newDni').value='';$('newName').value='';$('newPassword').value='';
+  $('newDni').value='';
+  $('newName').value='';
+  $('newPassword').value='';
   await loadStaff();
- }catch(e){showError(e)}
+
+ }catch(e){
+  showError(e);
+ }
 }
+
 function minutesBetween(a,b){
- const [ah,am]=a.split(':').map(Number),[bh,bm]=b.split(':').map(Number);
+ const [ah,am]=a.split(':').map(Number);
+ const [bh,bm]=b.split(':').map(Number);
  return bh*60+bm-ah*60-am;
 }
+
 function previousDay(date){
- const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);
+ const d=new Date(date+'T12:00:00');
+ d.setDate(d.getDate()-1);
  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+
 async function saveSchedule(){
  try{
   if(!admin())throw Error('Solo el administrador puede asignar horarios.');
-  const worker=$('shiftWorker').value,day=Number($('shiftDay').value),start=$('shiftStart').value,end=$('shiftEnd').value;
-  const start2=$('shiftStart2').value,end2=$('shiftEnd2').value,from=$('shiftFrom').value||today(),br=Number($('shiftBreak').value);
+
+  const worker=$('shiftWorker').value;
+  const day=Number($('shiftDay').value);
+  const start=$('shiftStart').value;
+  const end=$('shiftEnd').value;
+  const start2=$('shiftStart2').value;
+  const end2=$('shiftEnd2').value;
+  const from=$('shiftFrom').value||today();
+  const br=Number($('shiftBreak').value);
+
   if(!worker)throw Error('Selecciona un trabajador.');
   if(!start||!end||start>=end)throw Error('Revisa el primer turno.');
   if((start2&&!end2)||(!start2&&end2))throw Error('Completa ambos campos del segundo turno.');
   if(start2&&start2>=end2)throw Error('Revisa el segundo turno.');
   if(br<0)throw Error('El refrigerio no puede ser negativo.');
-  const {error:closeError}=await db.from('schedule_segments').update({valid_until:previousDay(from)}).eq('worker_id',worker).eq('day_of_week',day).is('valid_until',null).lt('valid_from',from);
+
+  const {error:closeError}=await db.from('schedule_segments')
+   .update({valid_until:previousDay(from)})
+   .eq('worker_id',worker)
+   .eq('day_of_week',day)
+   .is('valid_until',null)
+   .lt('valid_from',from);
+
   if(closeError)throw closeError;
-  const rows=[{segment_order:1,start_time:start,end_time:end,effective_work_minutes:Math.max(0,minutesBetween(start,end)-br)}];
-  if(start2)rows.push({segment_order:2,start_time:start2,end_time:end2,effective_work_minutes:Math.max(0,minutesBetween(start2,end2))});
-  const {error}=await db.from('schedule_segments').insert(rows.map(s=>({...s,worker_id:worker,day_of_week:day,valid_from:from,valid_until:null,created_by:profile.id})));
+
+  const rows=[{
+   segment_order:1,
+   start_time:start,
+   end_time:end,
+   effective_work_minutes:Math.max(0,minutesBetween(start,end)-br)
+  }];
+
+  if(start2){
+   rows.push({
+    segment_order:2,
+    start_time:start2,
+    end_time:end2,
+    effective_work_minutes:Math.max(0,minutesBetween(start2,end2))
+   });
+  }
+
+  const {error}=await db.from('schedule_segments').insert(
+   rows.map(s=>({
+    ...s,
+    worker_id:worker,
+    day_of_week:day,
+    valid_from:from,
+    valid_until:null,
+    created_by:profile.id
+   }))
+  );
+
   if(error)throw error;
+
   notice('Horario guardado. Verifica los turnos y las horas efectivas.');
- }catch(e){showError(e)}
+
+ }catch(e){
+  showError(e);
+ }
 }
+
 async function exportReport(){
  try{
   if(!admin())throw Error('Solo el administrador puede exportar informes.');
-  const from=$('dateFrom').value,to=$('dateTo').value;
+
+  const from=$('dateFrom').value;
+  const to=$('dateTo').value;
+
   if(!from||!to||from>to)throw Error('Selecciona un rango de fechas válido.');
   if(!workers.length)await loadStaff();
-  let query=db.from('attendance_marks').select('worker_id,mark_type,marked_at,photo_path').gte('marked_at',from+'T00:00:00').lte('marked_at',to+'T23:59:59.999').order('marked_at');
-  if($('reportWorker').value!=='all')query=query.eq('worker_id',$('reportWorker').value);
-  const {data,error}=await query;if(error)throw error;
+
+  let query=db.from('attendance_marks')
+   .select('worker_id,mark_type,marked_at,photo_path')
+   .gte('marked_at',from+'T00:00:00')
+   .lte('marked_at',to+'T23:59:59.999')
+   .order('marked_at');
+
+  if($('reportWorker').value!=='all'){
+   query=query.eq('worker_id',$('reportWorker').value);
+  }
+
+  const {data,error}=await query;
+  if(error)throw error;
+
   const people=Object.fromEntries(workers.map(w=>[w.id,w]));
-  const rows=[['DNI','Trabajador','Fecha y hora','Marcación','Ruta privada de fotografía'],...(data||[]).map(m=>{
-   const w=people[m.worker_id];
-   return [w?.dni||'',w?.full_name||'',new Date(m.marked_at).toLocaleString('es-PE'),labelMark(m.mark_type),m.photo_path||''];
-  })];
-  const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+
+  const rows=[
+   ['DNI','Trabajador','Fecha y hora','Marcación','Ruta privada de fotografía'],
+   ...(data||[]).map(m=>{
+    const w=people[m.worker_id];
+    return [
+     w?.dni||'',
+     w?.full_name||'',
+     new Date(m.marked_at).toLocaleString('es-PE'),
+     labelMark(m.mark_type),
+     m.photo_path||''
+    ];
+   })
+  ];
+
+  const csv=rows.map(r=>
+   r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')
+  ).join('\r\n');
+
   const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=`TurnoControl_${from}_${to}.csv`;a.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+
+  a.href=url;
+  a.download=`TurnoControl_${from}_${to}.csv`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+
   $('reportStatus').textContent=`Archivo generado: ${(data||[]).length} marcaciones.`;
- }catch(e){showError(e)}
-}
-async function start(){
- $('shiftFrom').value=today();$('dateFrom').value=today();$('dateTo').value=today();
- const {data:{session}}=await db.auth.getSession();
- if(session){
-  user=session.user;
-  try{await loadProfile();enterApp();await loadHome()}catch(e){showError(e)}
+
+ }catch(e){
+  showError(e);
  }
 }
+
+async function start(){
+ $('shiftFrom').value=today();
+ $('dateFrom').value=today();
+ $('dateTo').value=today();
+
+ const {data:{session},error}=await db.auth.getSession();
+ if(error){
+  showError(error);
+  return;
+ }
+
+ if(session){
+  user=session.user;
+  try{
+   await loadProfile();
+   enterApp();
+   await loadHome();
+  }catch(e){
+   await db.auth.signOut();
+   user=null;
+   profile=null;
+   $('app').classList.add('hidden');
+   $('bottomNav').classList.add('hidden');
+   $('login').classList.remove('hidden');
+   showError(e);
+  }
+ }
+}
+
 start();
 </script>
 </body>
