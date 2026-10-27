@@ -1,0 +1,22 @@
+
+{
+  "id": "/turnocontrol-manuel11/",
+  "name": "TurnoControl · Manuel 11",
+  "short_name": "TurnoControl",
+  "description": "Control de asistencia y horarios de Tiendas 3A",
+  "lang": "es-PE",
+  "start_url": "/turnocontrol-manuel11/",
+  "scope": "/turnocontrol-manuel11/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6fa",
+  "theme_color": "#123b67",
+  "icons": [
+    {
+      "src": "/turnocontrol-manuel11/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
